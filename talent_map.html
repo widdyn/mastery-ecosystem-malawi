@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mastery Ecosystem · Talent Map</title>
+  <!-- Google Fonts & Font Awesome -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="style.css">
+  <script src="theme.js"></script>
+  <style>
+    /* ----- TALENT MAP SPECIFIC STYLES ----- */
+    .map-filter-grid {
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: var(--space-8);
+      margin: var(--space-8) 0 var(--space-4);
+    }
+
+    .map-container {
+      background: var(--color-bg-muted);
+      border-radius: var(--radius-lg);
+      padding: 0;
+      border: 1px solid var(--color-border);
+      overflow: hidden;
+      min-height: 520px;
+    }
+
+    .map-container #leafletMap {
+      width: 100%;
+      height: 520px;
+      display: block;
+      border-radius: var(--radius-lg);
+      z-index: 1;
+    }
+
+    .map-caption {
+      margin-top: var(--space-3);
+      font-size: 0.9rem;
+      color: var(--color-text-secondary);
+      text-align: center;
+    }
+    .map-caption i {
+      margin-right: var(--space-1);
+    }
+
+    .filter-panel {
+      background: var(--color-bg-surface);
+      border-radius: var(--radius-lg);
+      padding: var(--space-8) var(--space-6);
+      box-shadow: var(--shadow-card);
+      border: 1px solid var(--color-border);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .filter-group {
+      margin-bottom: var(--space-6);
+    }
+    .filter-group label {
+      font-weight: 700;
+      display: block;
+      margin-bottom: var(--space-2);
+      color: var(--color-text);
+      font-size: 0.95rem;
+    }
+    .filter-select {
+      width: 100%;
+      padding: var(--space-3) var(--space-5);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-full);
+      font-family: var(--font-sans);
+      font-size: 0.95rem;
+      background: var(--color-bg-base);
+      color: var(--color-text);
+      outline: none;
+      transition: var(--transition-fast);
+      cursor: pointer;
+    }
+    .filter-select:focus {
+      border-color: var(--color-accent);
+      box-shadow: 0 0 0 3px var(--color-border-glow);
+    }
+    .filter-buttons {
+      display: flex;
+      gap: var(--space-3);
+      flex-wrap: wrap;
+      margin-top: var(--space-4);
+    }
+    .filter-buttons .btn {
+      flex: 1 0 auto;
+    }
+
+    .summary-line {
+      margin: var(--space-2) 0 var(--space-8);
+      font-weight: 700;
+      color: var(--color-primary);
+      font-size: 1.1rem;
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+    }
+    .dark-theme .summary-line {
+      color: var(--color-accent);
+    }
+
+    /* talent cards grid */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--space-6);
+      margin: var(--space-8) 0;
+    }
+    .talent-card {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: var(--space-4);
+      margin-bottom: var(--space-4);
+    }
+    .profile-img {
+      width: 60px;
+      height: 60px;
+      border-radius: var(--radius-full);
+      background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #FFFFFF;
+      font-weight: 700;
+      font-size: 1.5rem;
+      box-shadow: var(--shadow-sm);
+      border: 2px solid var(--color-border);
+    }
+    .name-district h3 {
+      font-size: 1.25rem;
+      font-family: var(--font-heading);
+      color: var(--color-text);
+      margin-bottom: var(--space-1);
+    }
+    .district-name {
+      color: var(--color-text-secondary);
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+    .badge-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-2);
+      margin: var(--space-3) 0;
+    }
+    .badge {
+      background: var(--color-bg-muted);
+      padding: var(--space-1) var(--space-4);
+      border-radius: var(--radius-full);
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--color-text);
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      border: 1px solid var(--color-border);
+    }
+    .badge i {
+      color: var(--color-accent);
+    }
+    .video-icon {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      background: var(--color-bg-muted);
+      padding: var(--space-2) var(--space-4);
+      border-radius: var(--radius-full);
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition-bounce);
+      border: 1px solid var(--color-border);
+      color: var(--color-text);
+    }
+    .video-icon:hover {
+      background: var(--color-accent);
+      color: #FFFFFF;
+      border-color: var(--color-accent);
+      transform: translateY(-2px);
+    }
+    .availability-tag {
+      display: inline-block;
+      padding: var(--space-1) var(--space-4);
+      border-radius: var(--radius-full);
+      font-size: 0.75rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      margin: var(--space-2) 0;
+      align-self: flex-start;
+      letter-spacing: 0.5px;
+    }
+    .tag-open { background: rgba(46, 125, 50, 0.12); color: #2e7d32; }
+    .dark-theme .tag-open { background: rgba(52, 211, 153, 0.15); color: #34d399; }
+    .tag-funding { background: rgba(10, 75, 140, 0.12); color: #0a4b8c; }
+    .dark-theme .tag-funding { background: rgba(56, 189, 248, 0.15); color: #38bdf8; }
+    .tag-freelance { background: rgba(106, 27, 154, 0.12); color: #6a1b9a; }
+    .dark-theme .tag-freelance { background: rgba(251, 191, 36, 0.15); color: #fbbf24; }
+    .card-quote {
+      font-size: 0.95rem;
+      color: var(--color-text-secondary);
+      margin: var(--space-4) 0;
+      flex: 1;
+      font-style: italic;
+      border-left: 2px solid var(--color-border);
+      padding-left: var(--space-3);
+    }
+    .card-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: var(--space-4);
+    }
+    .btn-outline-small {
+      border: 1px solid var(--color-text-secondary);
+      background: transparent;
+      padding: var(--space-2) var(--space-4);
+      border-radius: var(--radius-full);
+      font-weight: 600;
+      color: var(--color-text);
+      text-decoration: none;
+      transition: var(--transition-bounce);
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+    .btn-outline-small:hover {
+      background: var(--color-primary);
+      color: #FFFFFF;
+      border-color: var(--color-primary);
+      transform: translateY(-2px);
+    }
+    .dark-theme .btn-outline-small:hover {
+      background: var(--color-text);
+      color: var(--color-bg-base);
+      border-color: var(--color-text);
+    }
+
+    /* featured horizontal scroll */
+    .featured-scroll {
+      display: flex;
+      gap: var(--space-6);
+      overflow-x: auto;
+      padding: var(--space-2) var(--space-2) var(--space-6);
+      scrollbar-width: thin;
+      margin: var(--space-4) 0 var(--space-8);
+    }
+    .featured-card {
+      min-width: 300px;
+      flex: 0 0 auto;
+      background: var(--color-bg-muted);
+      border-radius: var(--radius-lg);
+      padding: var(--space-6);
+      border-left: 4px solid var(--color-accent);
+      border-top: 1px solid var(--color-border);
+      border-right: 1px solid var(--color-border);
+      border-bottom: 1px solid var(--color-border);
+      box-shadow: var(--shadow-sm);
+      transition: var(--transition-spring);
+    }
+    .featured-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-card);
+    }
+    .featured-badge {
+      background: var(--color-accent);
+      color: #FFFFFF;
+      font-weight: 800;
+      font-size: 0.7rem;
+      padding: var(--space-1) var(--space-3);
+      border-radius: var(--radius-full);
+      display: inline-block;
+      margin-bottom: var(--space-3);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    /* CTA cards */
+    .cta-cards {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-8);
+      margin: var(--space-12) 0;
+    }
+    .cta-card {
+      text-align: center;
+    }
+    .cta-icon {
+      font-size: 3rem;
+      color: var(--color-accent);
+      margin-bottom: var(--space-4);
+    }
+
+    /* modal */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(10, 21, 32, 0.6);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+    }
+    .modal-content {
+      background: var(--color-bg-surface);
+      max-width: 500px;
+      width: 90%;
+      border-radius: var(--radius-lg);
+      padding: var(--space-8);
+      text-align: center;
+      box-shadow: var(--shadow-lg);
+      border: 1px solid var(--color-border);
+      position: relative;
+      animation: zoomIn 350ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+    .modal-close {
+      position: absolute;
+      top: var(--space-4);
+      right: var(--space-4);
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: var(--color-text-secondary);
+      transition: var(--transition-fast);
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--radius-full);
+    }
+    .modal-close:hover {
+      color: var(--color-text);
+      background: var(--color-bg-muted);
+    }
+
+    @keyframes zoomIn {
+      from { opacity: 0; transform: scale(0.9); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    @media (max-width: 992px) {
+      .map-filter-grid {
+        grid-template-columns: 1fr;
+        gap: var(--space-6);
+      }
+      .cards-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .map-container {
+        min-height: 400px;
+      }
+      .map-container #leafletMap {
+        height: 400px;
+      }
+      .filter-buttons .btn {
+        flex: 1 1 auto;
+        padding: 0.5rem 1rem;
+        font-size: 0.85rem;
+      }
+    }
+    @media (max-width: 480px) {
+      .cards-grid {
+        grid-template-columns: 1fr;
+        gap: var(--space-4);
+      }
+      .cta-cards {
+        grid-template-columns: 1fr;
+        gap: var(--space-6);
+      }
+      .map-container {
+        min-height: 300px;
+      }
+      .map-container #leafletMap {
+        height: 300px;
+      }
+      .filter-panel {
+        padding: var(--space-6) var(--space-4);
+      }
+      .cards-section {
+        padding: var(--space-8) 0;
+      }
+      .filter-buttons {
+        flex-direction: column;
+      }
+      .filter-buttons .btn {
+        width: 100%;
+        justify-content: center;
+      }
+      .filter-select {
+        padding: var(--space-3) var(--space-4);
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="index.html" class="logo">Mastery <span>Ecosystem</span></a>
+      <button class="hamburger" id="hamburgerBtn" aria-label="Menu"><i class="fas fa-bars"></i></button>
+      <ul class="nav-menu" id="navMenu">
+        <li><a href="Our_model.html">Our Model</a></li>
+        <li><a href="talent_map.html">Talent Map</a></li>
+        <li><a href="investor_impact_dashboard.html">Investor Impact</a></li>
+        <li><a href="manifesto.html">Manifesto</a></li>
+        <li><a href="About_us.html">About</a></li>
+        <li><a href="contact.html">Contact</a></li>
+        <li class="nav-auth-item"><a href="auth.html" class="nav-auth-link">Sign Up</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main>
+    <!-- 1. Page Title & Intro -->
+    <div class="container" style="margin-top: var(--space-12);">
+      <h1>Discover Malawi's Future Industrialists</h1>
+      <p class="section-subhead">Browse verified young innovators from every district. Each profile is backed by a Mastery Badge and a real‑world demonstration of skill.</p>
+      <p style="margin-bottom: var(--space-8);">Use filters to find talent by location, skill, or availability. Ready to hire or invest? Contact them directly.</p>
+    </div>
+
+    <!-- 2. Map & Filters Section -->
+    <div class="container">
+      <div class="map-filter-grid">
+        <!-- Left: Real Leaflet map -->
+        <div class="map-container">
+          <div id="leafletMap"></div>
+          <div class="map-caption"><i class="fas fa-map-marker-alt" style="color: var(--color-accent);"></i> Click a district to zoom, or scroll to explore</div>
+        </div>
+        <!-- Right: Filter panel -->
+        <div class="filter-panel">
+          <div class="filter-group">
+            <label for="districtFilter">District</label>
+            <select id="districtFilter" class="filter-select">
+              <option value="all">All Districts</option>
+              <option value="Lilongwe">Lilongwe</option>
+              <option value="Blantyre">Blantyre</option>
+              <option value="Mzimba">Mzimba</option>
+              <option value="Dedza">Dedza</option>
+              <option value="Mzuzu">Mzuzu</option>
+              <option value="Salima">Salima</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label for="skillFilter">Skill</label>
+            <select id="skillFilter" class="filter-select">
+              <option value="all">All Skills</option>
+              <option value="Solar Installation">Solar Installation</option>
+              <option value="Agri-tech">Agri-tech</option>
+              <option value="Digital Marketing">Digital Marketing</option>
+              <option value="Coding">Coding</option>
+              <option value="AI Data Labeling">AI Data Labeling</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label for="availabilityFilter">Availability</label>
+            <select id="availabilityFilter" class="filter-select">
+              <option value="all">All</option>
+              <option value="Open to Work">Open to Work</option>
+              <option value="Seeking Funding">Seeking Funding</option>
+              <option value="Available for Freelance">Available for Freelance</option>
+            </select>
+          </div>
+          <div class="filter-buttons">
+            <button class="btn btn-primary btn-sm" id="applyFilters">Apply Filters</button>
+            <button class="btn btn-outline-light btn-sm" id="resetFilters">Reset</button>
+          </div>
+        </div>
+      </div>
+      <div class="summary-line" id="summary">Showing 8 of 8 talents</div>
+    </div>
+
+    <!-- Featured Talent Spotlight -->
+    <div class="container">
+      <h2 style="font-size: 2rem; margin-top: var(--space-12);">⭐ Featured Talent</h2>
+      <div class="featured-scroll">
+        <div class="featured-card">
+          <span class="featured-badge">Featured</span>
+          <div style="display: flex; gap: var(--space-4); align-items: center; margin-bottom: var(--space-4);">
+            <div class="profile-img" style="width: 50px; height: 50px; font-size: 1.2rem;">KM</div>
+            <div><strong style="color: var(--color-text);">Kondwani M.</strong> <div style="color: var(--color-text-secondary); font-size: 0.85rem;">Lilongwe</div></div>
+          </div>
+          <p class="card-quote" style="border: none; padding: 0; margin-bottom: var(--space-4);">“Designed a solar irrigation system for 10 farms.”</p>
+          <div class="badge"><i class="fas fa-sun"></i> Solar Installation</div>
+        </div>
+        <div class="featured-card">
+          <span class="featured-badge">Featured</span>
+          <div style="display: flex; gap: var(--space-4); align-items: center; margin-bottom: var(--space-4);">
+            <div class="profile-img" style="width: 50px; height: 50px; font-size: 1.2rem;">CP</div>
+            <div><strong style="color: var(--color-text);">Chisomo P.</strong> <div style="color: var(--color-text-secondary); font-size: 0.85rem;">Blantyre</div></div>
+          </div>
+          <p class="card-quote" style="border: none; padding: 0; margin-bottom: var(--space-4);">“Built a mobile app for farmers.”</p>
+          <div class="badge"><i class="fas fa-code"></i> Coding</div>
+        </div>
+        <div class="featured-card">
+          <span class="featured-badge">Featured</span>
+          <div style="display: flex; gap: var(--space-4); align-items: center; margin-bottom: var(--space-4);">
+            <div class="profile-img" style="width: 50px; height: 50px; font-size: 1.2rem;">GM</div>
+            <div><strong style="color: var(--color-text);">Grace M.</strong> <div style="color: var(--color-text-secondary); font-size: 0.85rem;">Mzuzu</div></div>
+          </div>
+          <p class="card-quote" style="border: none; padding: 0; margin-bottom: var(--space-4);">“Digital marketing campaign reached 50k people.”</p>
+          <div class="badge"><i class="fas fa-chart-line"></i> Digital Marketing</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. Talent Cards Grid (dynamically generated) -->
+    <div class="container">
+      <div class="cards-grid" id="talentGrid"></div>
+    </div>
+
+    <!-- 4. CTA for Employers & Investors -->
+    <div class="container">
+      <div class="cta-cards">
+        <div class="cta-card">
+          <div class="cta-icon"><i class="fas fa-briefcase"></i></div>
+          <h3>Hire Top Talent</h3>
+          <p style="margin: var(--space-4) 0;">Need skilled workers? Tell us your requirements and we’ll send you a shortlist of pre‑vetted candidates.</p>
+          <a href="mailto:info@masteryecosystem.mw" class="btn btn-primary">Request a Shortlist</a>
+        </div>
+        <div class="cta-card">
+          <div class="cta-icon"><i class="fas fa-chart-line"></i></div>
+          <h3>Fund a Startup</h3>
+          <p style="margin: var(--space-4) 0;">Interested in backing a youth‑led venture? Browse talent seeking funding or contact us to discuss impact investment.</p>
+          <a href="mailto:info@masteryecosystem.mw" class="btn btn-primary">Explore Investment Opportunities</a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <div class="footer-logo">Mastery <span>Ecosystem</span></div>
+          <p class="footer-desc">From learning to impact – uniting Malawi’s talent with industry.</p>
+          <div class="social-icons">
+            <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+            <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+            <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+            <a href="#" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+          </div>
+        </div>
+        <div class="footer-links">
+          <h4>Explore</h4>
+          <a href="Our_model.html">Our Model</a>
+          <a href="talent_map.html">Talent Map</a>
+          <a href="investor_impact_dashboard.html">Investor Impact</a>
+          <a href="manifesto.html">Manifesto</a>
+        </div>
+        <div class="footer-links">
+          <h4>Connect</h4>
+          <a href="About_us.html">About</a>
+          <a href="contact.html">Contact</a>
+          <a href="#">Blog</a>
+        </div>
+        <div class="footer-contact">
+          <h4>Contact</h4>
+          <div class="footer-contact-item"><i class="fas fa-envelope"></i> info@masteryecosystem.mw</div>
+          <div class="footer-contact-item"><i class="fas fa-map-pin"></i> Area 47, Lilongwe, Malawi</div>
+        </div>
+      </div>
+      <div class="copyright">
+        © 2026 Mastery Ecosystem. All rights reserved.
+      </div>
+    </div>
+  </footer>
+
+  <!-- Modal for video / profile (simple) -->
+  <div id="videoModal" class="modal">
+    <div class="modal-content">
+      <span class="modal-close" id="closeModal">&times;</span>
+      <i class="fas fa-video" style="font-size: 3rem; color: var(--color-accent); margin-bottom: var(--space-4); display: inline-block;"></i>
+      <h3 style="margin: var(--space-4) 0;">Video Demonstration</h3>
+      <p style="color: var(--color-text-secondary);">In a real implementation, a 30‑second clip would play here showing the talent's skill.</p>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      // ---------- talent data ----------
+      const talents = [
+        { name: "Kondwani Banda", district: "Mzimba", skill: "Solar Installation", availability: "Open to Work", description: "Installed solar systems for 20 households in my village.", initials: "KB", video: true, badge2: null },
+        { name: "Chisomo Phiri", district: "Lilongwe", skill: "Agri-tech", availability: "Seeking Funding", description: "Developed a low-cost drip irrigation kit.", initials: "CP", video: true, badge2: null },
+        { name: "Grace Mwale", district: "Blantyre", skill: "Digital Marketing", availability: "Available for Freelance", description: "Managed social media for 5 local SMEs.", initials: "GM", video: true, badge2: "Content" },
+        { name: "Tione Nyirenda", district: "Dedza", skill: "Coding", availability: "Open to Work", description: "Built a mobile money tracker for vendors.", initials: "TN", video: false, badge2: null },
+        { name: "Zione Banda", district: "Mzuzu", skill: "AI Data Labeling", availability: "Open to Work", description: "Labeled 10k images for agri-tech startup.", initials: "ZB", video: true, badge2: null },
+        { name: "Blessings Mhone", district: "Salima", skill: "Solar Installation", availability: "Available for Freelance", description: "Maintains solar pumps in Salima.", initials: "BM", video: false, badge2: "Maintenance" },
+        { name: "Fatima Nkhata", district: "Lilongwe", skill: "Agri-tech", availability: "Seeking Funding", description: "Created a mushroom growing kit from waste.", initials: "FN", video: true, badge2: null },
+        { name: "Yamikani Chisi", district: "Blantyre", skill: "Coding", availability: "Available for Freelance", description: "Built an inventory system for a hardware store.", initials: "YC", video: false, badge2: null }
+      ];
+
+      const talentGrid = document.getElementById('talentGrid');
+      const summarySpan = document.getElementById('summary');
+      const districtSelect = document.getElementById('districtFilter');
+      const skillSelect = document.getElementById('skillFilter');
+      const availabilitySelect = document.getElementById('availabilityFilter');
+      const applyBtn = document.getElementById('applyFilters');
+      const resetBtn = document.getElementById('resetFilters');
+
+      // Map district paths
+      const districtPaths = document.querySelectorAll('.district');
+      let activeDistrict = null;
+
+      // Helper to clear map highlights
+      function clearMapHighlight() {
+        districtPaths.forEach(p => p.classList.remove('active'));
+      }
+
+      // Render cards based on filters
+      function renderCards() {
+        const district = districtSelect.value;
+        const skill = skillSelect.value;
+        const availability = availabilitySelect.value;
+
+        const filtered = talents.filter(t => {
+          if (district !== 'all' && t.district !== district) return false;
+          if (skill !== 'all' && t.skill !== skill) return false;
+          if (availability !== 'all' && t.availability !== availability) return false;
+          return true;
+        });
+
+        // Update summary
+        summarySpan.innerText = `Showing ${filtered.length} of ${talents.length} talents`;
+
+        // Build HTML
+        let html = '';
+        filtered.forEach(t => {
+          const badge2Html = t.badge2 ? `<span class="badge"><i class="fas fa-tag"></i> ${t.badge2}</span>` : '';
+          const videoHtml = t.video ? `<span class="video-icon" onclick="openVideoModal('${t.name}')"><i class="fas fa-play"></i> 30s video</span>` : '';
+          const availabilityClass = t.availability === 'Open to Work' ? 'tag-open' : (t.availability === 'Seeking Funding' ? 'tag-funding' : 'tag-freelance');
+          html += `<div class="talent-card card">
+            <div class="card-header">
+              <div class="profile-img">${t.initials}</div>
+              <div class="name-district">
+                <h3>${t.name}</h3>
+                <div class="district-name"><i class="fas fa-map-marker-alt" style="color: var(--color-accent);"></i> ${t.district}</div>
+              </div>
+            </div>
+            <div class="badge-container">
+              <span class="badge"><i class="fas fa-bolt"></i> ${t.skill}</span>
+              ${badge2Html}
+            </div>
+            <div class="availability-tag ${availabilityClass}">${t.availability}</div>
+            <p class="card-quote">“${t.description}”</p>
+            <div class="card-footer">
+              ${videoHtml}
+              <button class="btn-outline-small" onclick="viewProfile('${t.name}')">View Profile</button>
+            </div>
+          </div>`;
+        });
+        talentGrid.innerHTML = html;
+        
+        // Setup visual animations
+        const animElements = talentGrid.querySelectorAll('.talent-card');
+        animElements.forEach((item, idx) => {
+          item.classList.add('stagger-item');
+          item.style.transitionDelay = `${(idx % 3) * 75}ms`;
+          setTimeout(() => item.classList.add('appear'), 50);
+        });
+      }
+
+      // Initial render
+      renderCards();
+
+      // Filter apply
+      applyBtn.addEventListener('click', () => {
+        // sync map highlight with district selection
+        const selectedDistrict = districtSelect.value;
+        clearMapHighlight();
+        if (selectedDistrict !== 'all') {
+          const activePath = document.getElementById(`district${selectedDistrict}`);
+          if (activePath) activePath.classList.add('active');
+        }
+        renderCards();
+      });
+
+      // Reset filters
+      resetBtn.addEventListener('click', () => {
+        districtSelect.value = 'all';
+        skillSelect.value = 'all';
+        availabilitySelect.value = 'all';
+        clearMapHighlight();
+        renderCards();
+      });
+
+      // Map click handler
+      districtPaths.forEach(path => {
+        path.addEventListener('click', (e) => {
+          const district = path.getAttribute('data-district');
+          if (district) {
+            districtSelect.value = district;
+            clearMapHighlight();
+            path.classList.add('active');
+            renderCards();
+          }
+        });
+      });
+
+      // Hamburger menu
+      const hamburger = document.getElementById('hamburgerBtn');
+      const navMenu = document.getElementById('navMenu');
+      if (hamburger && navMenu) {
+        hamburger.addEventListener('click', (e) => {
+          e.stopPropagation();
+          navMenu.classList.toggle('show');
+        });
+        navMenu.querySelectorAll('a').forEach(link => {
+          link.addEventListener('click', () => {
+            if (window.innerWidth <= 768) navMenu.classList.remove('show');
+          });
+        });
+      }
+      window.addEventListener('resize', () => {
+        if (window.innerWidth > 768 && navMenu?.classList.contains('show')) {
+          navMenu.classList.remove('show');
+        }
+      });
+
+      // Modal functions
+      window.openVideoModal = (name) => {
+        document.getElementById('videoModal').style.display = 'flex';
+      };
+      window.viewProfile = (name) => {
+        alert(`Profile of ${name} – (full profile would open here)`);
+      };
+      document.getElementById('closeModal').addEventListener('click', () => {
+        document.getElementById('videoModal').style.display = 'none';
+      });
+      window.addEventListener('click', (e) => {
+        if (e.target.classList.contains('modal')) {
+          e.target.style.display = 'none';
+        }
+      });
+    })();
+  </script>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    (function() {
+      const map = L.map('leafletMap').setView([-13.5, 34], 7);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>',
+        maxZoom: 19
+      }).addTo(map);
+
+      let districtLayer = null;
+
+      fetch('malawi_districts.geojson')
+        .then(r => r.json())
+        .then(data => {
+          districtLayer = L.geoJSON(data, {
+            style: {
+              color: '#2b8cbe',
+              weight: 2,
+              fillColor: '#a6cee3',
+              fillOpacity: 0.2
+            },
+            onEachFeature: (feature, layer) => {
+              layer.bindTooltip(feature.properties.shapeName || 'District', { sticky: true, direction: 'top' });
+              layer.on('click', () => {
+                map.fitBounds(layer.getBounds(), { padding: [40, 40] });
+              });
+            }
+          }).addTo(map);
+
+          // Sync district dropdown click to map zoom
+          document.getElementById('districtFilter').addEventListener('change', function() {
+            const name = this.value;
+            if (name === 'all') {
+              map.setView([-13.5, 34], 7);
+              return;
+            }
+            if (!districtLayer) return;
+            districtLayer.eachLayer(l => {
+              if (l.feature.properties.shapeName === name) {
+                map.fitBounds(l.getBounds(), { padding: [40, 40] });
+              }
+            });
+          });
+        })
+        .catch(err => console.error('Failed to load district boundaries:', err));
+
+      // Load user markers from API
+      fetch('http://localhost:3000/api/users')
+        .then(r => r.json())
+        .then(users => {
+          users.forEach(user => {
+            L.marker([user.latitude, user.longitude])
+              .addTo(map)
+              .bindPopup(`<strong>${user.name}</strong><br>Phone: ${user.phone}<br>Email: ${user.email}`);
+          });
+        })
+        .catch(() => {}); // silently fail if backend not running
+    })();
+  </script>
+</body>
+</html>

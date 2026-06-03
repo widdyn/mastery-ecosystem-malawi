@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mastery Ecosystem · Malawi</title>
+  <!-- Google Fonts & Font Awesome -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet" href="style.css">
+  <script src="theme.js"></script>
+  <style>
+    /* Page specific layouts */
+    .hero {
+      padding: var(--space-24) 0 var(--space-16);
+      background: linear-gradient(135deg, var(--color-bg-base) 0%, var(--color-bg-muted) 100%);
+      border-bottom: 1px solid var(--color-border);
+      overflow: hidden;
+      position: relative;
+    }
+    
+    .hero::before {
+      content: '';
+      position: absolute;
+      width: 300px;
+      height: 300px;
+      background: var(--color-accent);
+      filter: blur(140px);
+      opacity: 0.06;
+      top: -10%;
+      right: 5%;
+      pointer-events: none;
+      z-index: 1;
+    }
+    
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: var(--space-12);
+      align-items: center;
+      position: relative;
+      z-index: 2;
+    }
+    
+    .hero-buttons {
+      display: flex;
+      gap: var(--space-4);
+      flex-wrap: wrap;
+      margin-top: var(--space-8);
+    }
+    
+    .hero-image {
+      border-radius: var(--radius-xl);
+      height: 420px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-image: linear-gradient(rgba(10,47,68,0.1), rgba(10,47,68,0.25)), url('https://placehold.co/800x600/0A2F44/white?text=🇲🇼+Youth+in+workshop');
+      background-size: cover;
+      background-position: center;
+      box-shadow: var(--shadow-lg);
+      border: 1px solid var(--color-border);
+      transition: var(--transition-spring);
+    }
+    
+    .hero-image:hover {
+      transform: scale(1.015) rotate(0.5deg);
+    }
+    
+    @media (max-width: 992px) {
+      .hero {
+        padding: var(--space-16) 0 var(--space-12);
+      }
+      .hero-grid {
+        grid-template-columns: 1fr;
+        gap: var(--space-8);
+      }
+      .hero-image {
+        order: -1;
+        height: 300px;
+      }
+      .hero-buttons {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .hero-buttons .btn {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .hero {
+        padding: var(--space-12) 0 var(--space-10);
+      }
+      .hero-image {
+        height: 220px;
+      }
+    }
+    
+    /* Value Props */
+    .value-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: var(--space-6);
+      margin: var(--space-16) 0;
+    }
+    
+    .value-card {
+      text-align: center;
+      padding: var(--space-8) var(--space-4);
+    }
+    
+    .value-icon {
+      font-size: 2.75rem;
+      color: var(--color-accent);
+      margin-bottom: var(--space-4);
+      transition: var(--transition-spring);
+      display: inline-block;
+    }
+    
+    .value-card:hover .value-icon {
+      transform: scale(1.15) rotate(5deg);
+    }
+    
+    @media (max-width: 992px) {
+      .value-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--space-4);
+        margin: var(--space-12) 0;
+      }
+    }
+    @media (max-width: 480px) {
+      .value-grid {
+        grid-template-columns: 1fr;
+        gap: var(--space-4);
+        margin: var(--space-10) 0;
+      }
+      .value-card {
+        padding: var(--space-6) var(--space-4);
+      }
+    }
+    
+    /* Social Proof Strip */
+    .proof-strip {
+      background: var(--color-bg-muted);
+      padding: var(--space-6) 0;
+      margin: var(--space-12) 0;
+      border-radius: var(--radius-xl) 0 var(--radius-xl) 0;
+      border: 1px solid var(--color-border);
+      overflow: hidden;
+    }
+    
+    .strip-scroll {
+      display: flex;
+      gap: var(--space-8);
+      overflow-x: auto;
+      padding: var(--space-2) var(--space-2) var(--space-4);
+      scrollbar-width: thin;
+      -webkit-overflow-scrolling: touch;
+      white-space: nowrap;
+    }
+    
+    .partner-item {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-3);
+      background: var(--color-bg-surface);
+      padding: var(--space-2) var(--space-6);
+      border-radius: var(--radius-full);
+      box-shadow: var(--shadow-sm);
+      font-weight: 600;
+      font-size: 0.95rem;
+      border: 1px solid var(--color-border);
+      color: var(--color-text);
+      transition: var(--transition-bounce);
+    }
+    
+    .partner-item:hover {
+      transform: translateY(-2px);
+      border-color: var(--color-accent);
+      box-shadow: var(--shadow-card);
+    }
+    
+    .partner-item i {
+      font-size: 1.25rem;
+      color: var(--color-accent);
+    }
+    
+    .recipient-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: var(--radius-full);
+      background: var(--color-primary);
+      color: #FFFFFF;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.75rem;
+      border: 2px solid var(--color-border);
+    }
+    
+    /* Impact Counter */
+    .impact-row {
+      display: flex;
+      justify-content: center;
+      gap: var(--space-16);
+      flex-wrap: wrap;
+      margin: var(--space-12) 0 var(--space-16);
+      text-align: center;
+    }
+    
+    .impact-number {
+      font-size: clamp(3rem, 6vw, 4.5rem);
+      font-weight: 800;
+      color: var(--color-accent);
+      line-height: 1;
+      font-family: var(--font-heading);
+      letter-spacing: -0.03em;
+    }
+    
+    .impact-label {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--color-text-secondary);
+      letter-spacing: 0.01em;
+      margin-top: var(--space-2);
+    }
+    
+    @media (max-width: 768px) {
+      .impact-row {
+        gap: var(--space-10);
+        margin: var(--space-10) 0 var(--space-12);
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .impact-row {
+        gap: var(--space-8);
+      }
+      .impact-number {
+        font-size: clamp(2.2rem, 10vw, 3rem);
+      }
+    }
+    
+    /* Featured Talent Spotlight */
+    .talent-spotlight {
+      background: var(--color-bg-muted);
+      border-radius: var(--radius-xl);
+      padding: var(--space-12) var(--space-8);
+      margin: var(--space-16) 0;
+      border: 1px solid var(--color-border);
+    }
+    
+    .talent-grid {
+      display: grid;
+      grid-template-columns: 0.96fr 1.04fr;
+      gap: var(--space-12);
+      align-items: center;
+    }
+    
+    .talent-photo {
+      background-image: linear-gradient(rgba(10,47,68,0.05), rgba(10,47,68,0.15)), url('https://placehold.co/700x500/0A2F44/white?text=Grace,+23');
+      background-size: cover;
+      background-position: center;
+      border-radius: var(--radius-lg);
+      height: 340px;
+      box-shadow: var(--shadow-lg);
+      border: 1px solid var(--color-border);
+    }
+    
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      background: var(--color-bg-surface);
+      padding: var(--space-2) var(--space-4);
+      border-radius: var(--radius-full);
+      font-weight: 600;
+      font-size: 0.9rem;
+      margin: var(--space-4) 0 var(--space-6);
+      border: 1px solid var(--color-border);
+      color: var(--color-text);
+    }
+    
+    .badge i {
+      color: var(--color-accent);
+    }
+    
+    .meet-link {
+      font-weight: 700;
+      color: var(--color-accent);
+      text-decoration: none;
+      font-size: 1.05rem;
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-1);
+      transition: var(--transition-fast);
+    }
+    
+    .meet-link:hover {
+      text-decoration: underline;
+      gap: var(--space-2);
+    }
+    
+    @media (max-width: 768px) {
+      .talent-grid {
+        grid-template-columns: 1fr;
+        gap: var(--space-8);
+      }
+      .talent-photo {
+        height: 260px;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .talent-spotlight {
+        padding: var(--space-8) var(--space-4);
+      }
+      .talent-photo {
+        height: 200px;
+      }
+    }
+    
+    /* How It Works Steps */
+    .steps-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--space-6);
+      margin: var(--space-12) 0;
+    }
+    
+    .step-card {
+      text-align: left;
+    }
+    
+    .step-icon {
+      font-size: 2.5rem;
+      color: var(--color-accent);
+      margin-bottom: var(--space-4);
+    }
+    
+    .step-number {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--color-text-secondary);
+      font-weight: 700;
+      margin-bottom: var(--space-2);
+    }
+    
+    .step-card h3 {
+      font-size: 1.45rem;
+      margin-bottom: var(--space-3);
+    }
+    
+    @media (max-width: 768px) {
+      .steps-grid {
+        grid-template-columns: 1fr;
+        gap: var(--space-6);
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .steps-grid {
+        gap: var(--space-8);
+        margin: var(--space-8) 0;
+      }
+    }
+    
+    /* Secondary CTAs */
+    .cta-group {
+      display: flex;
+      gap: var(--space-6);
+      justify-content: center;
+      flex-wrap: wrap;
+      margin: var(--space-12) 0 var(--space-16);
+    }
+    
+    @media (max-width: 480px) {
+      .cta-group {
+        flex-direction: column;
+        gap: var(--space-4);
+        margin: var(--space-10) 0 var(--space-12);
+      }
+      .cta-group .btn {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="index.html" class="logo">Mastery <span>Ecosystem</span></a>
+      <button class="hamburger" id="hamburgerBtn" aria-label="Menu"><i class="fas fa-bars"></i></button>
+      <ul class="nav-menu" id="navMenu">
+        <li><a href="Our_model.html">Our Model</a></li>
+        <li><a href="talent_map.html">Talent Map</a></li>
+        <li><a href="investor_impact_dashboard.html">Investor Impact</a></li>
+        <li><a href="manifesto.html">Manifesto</a></li>
+        <li><a href="About_us.html">About</a></li>
+        <li><a href="contact.html">Contact</a></li>
+        <li class="nav-auth-item"><a href="auth.html" class="nav-auth-link">Sign Up</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main>
+    <!-- Hero Section -->
+    <section class="hero">
+      <div class="container hero-grid">
+        <div>
+          <h1>From Rote Learning to Real‑World Impact.</h1>
+          <p class="section-subhead">Identifying Malawi’s hidden talents, equipping them with one mastery, and connecting them to industries—no degree required.</p>
+          <div class="hero-buttons">
+            <a href="#" class="btn btn-primary btn-block-mobile">Explore the Talent Map <i class="fas fa-arrow-right" style="margin-left: var(--space-2);"></i></a>
+            <a href="#" class="btn btn-outline btn-block-mobile">Join the Movement</a>
+          </div>
+        </div>
+        <div class="hero-image" role="img" aria-label="Malawian youth confidently working on a soldering project"></div>
+      </div>
+    </section>
+
+    <!-- Value Proposition (4 icons) -->
+    <div class="container">
+      <div class="value-grid">
+        <div class="value-card">
+          <div class="value-icon"><i class="fas fa-compass"></i></div>
+          <h3>Discover</h3>
+          <p>We unearth gifted youth in every district through community safaris and radio.</p>
+        </div>
+        <div class="value-card">
+          <div class="value-icon"><i class="fas fa-medal"></i></div>
+          <h3>Master One Skill</h3>
+          <p>Intensive sprints in a single high‑demand area, co‑designed with industry.</p>
+        </div>
+        <div class="value-card">
+          <div class="value-icon"><i class="fas fa-handshake"></i></div>
+          <h3>Connect to Industry</h3>
+          <p>Direct pathways to companies, investors, and freelance opportunities.</p>
+        </div>
+        <div class="value-card">
+          <div class="value-icon"><i class="fas fa-industry"></i></div>
+          <h3>Industrialize Malawi</h3>
+          <p>Turning job seekers into job creators who build local enterprises.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Social Proof Strip -->
+    <div class="proof-strip">
+      <div class="container strip-scroll">
+        <!-- partner logos (text/icon) -->
+        <span class="partner-item"><i class="fas fa-seedling" style="color: #4CAF50;"></i> AgriTech Malawi</span>
+        <span class="partner-item"><i class="fas fa-solar-panel"></i> Solar Solutions</span>
+        <span class="partner-item"><i class="fas fa-mug-hot"></i> Mzuzu Coffee</span>
+        <span class="partner-item"><i class="fas fa-broadcast-tower"></i> Zodiak</span>
+        <span class="partner-item"><i class="fas fa-microphone-alt"></i> MIJ FM</span>
+        <!-- recipients -->
+        <span class="partner-item"><span class="recipient-avatar">TG</span> Temwa G.</span>
+        <span class="partner-item"><span class="recipient-avatar">CE</span> Chimwemwe E.</span>
+        <span class="partner-item"><span class="recipient-avatar">FM</span> Fatsani M.</span>
+      </div>
+    </div>
+
+    <!-- Impact Counter -->
+    <div class="container text-center">
+      <div class="impact-row">
+        <div><span class="impact-number" id="count1">150+</span><div class="impact-label">Youth skilled</div></div>
+        <div><span class="impact-number" id="count2">12</span><div class="impact-label">Companies engaged</div></div>
+        <div><span class="impact-number" id="count3">8</span><div class="impact-label">New ventures launched</div></div>
+      </div>
+    </div>
+
+    <!-- Featured Talent Spotlight -->
+    <div class="container talent-spotlight">
+      <div class="talent-grid">
+        <div class="talent-photo" role="img" aria-label="Grace, 23, solar technician"></div>
+        <div>
+          <h2 style="margin-bottom: var(--space-2);">Grace, 23</h2>
+          <p style="font-size: 1.2rem;">“After our 6‑week solar installation sprint, Grace now leads a team of three and provides clean energy to 50 households in her village.”</p>
+          <div class="badge"><i class="fas fa-bolt"></i> Mastery Badge: Solar Installation · endorsed by Solar Malawi</div>
+          <a href="#" class="meet-link">Meet more talents <i class="fas fa-arrow-right"></i></a>
+        </div>
+      </div>
+    </div>
+
+    <!-- How It Works (3 steps) -->
+    <div class="container">
+      <h2 class="text-center">How it works</h2>
+      <div class="steps-grid">
+        <div class="step-card">
+          <div class="step-icon"><i class="fas fa-magnifying-glass"></i></div>
+          <div class="step-number">STEP 1</div>
+          <h3>We find you</h3>
+          <p>Through community safaris, radio partnerships, and local referrals, we discover gifted youth where they are.</p>
+        </div>
+        <div class="step-card">
+          <div class="step-icon"><i class="fas fa-screwdriver-wrench"></i></div>
+          <div class="step-number">STEP 2</div>
+          <h3>You master one skill</h3>
+          <p>Join an intensive 6‑12 week sprint focused on a single high‑demand skill, with real projects from industry partners.</p>
+        </div>
+        <div class="step-card">
+          <div class="step-icon"><i class="fas fa-briefcase"></i></div>
+          <div class="step-number">STEP 3</div>
+          <h3>You get connected</h3>
+          <p>Graduates receive a Mastery Badge and are connected to employment, funding, or startup incubation.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Secondary CTAs -->
+    <div class="container cta-group">
+      <a href="#" class="btn btn-outline btn-outline-light btn-block-mobile">Partner with us</a>
+      <a href="#" class="btn btn-primary btn-block-mobile">Fund a future industrialist</a>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <div class="footer-logo">Mastery <span>Ecosystem</span></div>
+          <p style="color: #cfdfea; margin-bottom: var(--space-6);">From learning to impact – uniting Malawi’s talent with industry.</p>
+          <div class="social-icons">
+            <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+            <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+            <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+            <a href="#" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+          </div>
+        </div>
+        <div class="footer-links">
+          <h4 style="color: white; margin-bottom: var(--space-4);">Explore</h4>
+          <a href="Our_model.html">Our Model</a>
+          <a href="talent_map.html">Talent Map</a>
+          <a href="investor_impact_dashboard.html">Investor Impact</a>
+          <a href="manifesto.html">Manifesto</a>
+        </div>
+        <div class="footer-links">
+          <h4 style="color: white; margin-bottom: var(--space-4);">Connect</h4>
+          <a href="About_us.html">About</a>
+          <a href="contact.html">Contact</a>
+          <a href="#">Blog</a>
+        </div>
+        <div>
+          <h4 style="color: white; margin-bottom: var(--space-4);">Contact</h4>
+          <p><i class="fas fa-envelope" style="margin-right: var(--space-2); color: var(--vibrant-green);"></i> info@masteryecosystem.mw</p>
+          <p><i class="fas fa-map-pin" style="margin-right: var(--space-2); color: var(--vibrant-green);"></i> Area 47, Lilongwe, Malawi</p>
+        </div>
+      </div>
+      <div class="copyright">
+        © 2026 Mastery Ecosystem. All rights reserved.
+      </div>
+    </div>
+  </footer>
+
+  <!-- Interactivity: hamburger + count-up (simple) -->
+  <script>
+    (function() {
+      // Hamburger menu
+      const hamburger = document.getElementById('hamburgerBtn');
+      const navMenu = document.getElementById('navMenu');
+      if (hamburger && navMenu) {
+        hamburger.addEventListener('click', function(e) {
+          e.stopPropagation();
+          navMenu.classList.toggle('show');
+        });
+        // close on link click (mobile)
+        navMenu.querySelectorAll('a').forEach(link => {
+          link.addEventListener('click', () => {
+            if (window.innerWidth <= 768) navMenu.classList.remove('show');
+          });
+        });
+      }
+
+      // Count-up animation on impact numbers (simple, triggers once)
+      const counters = [
+        { element: document.getElementById('count1'), target: 150, suffix: '+' },
+        { element: document.getElementById('count2'), target: 12, suffix: '' },
+        { element: document.getElementById('count3'), target: 8, suffix: '' }
+      ];
+      
+      // set initial static values (already hardcoded, but we override for animation)
+      counters[0].element.innerText = '0+';
+      counters[1].element.innerText = '0';
+      counters[2].element.innerText = '0';
+
+      let counted = false;
+      function startCountUp() {
+        if (counted) return;
+        counted = true;
+        counters.forEach(c => {
+          let current = 0;
+          const step = Math.ceil(c.target / 40); // smooth increment
+          const timer = setInterval(() => {
+            current += step;
+            if (current >= c.target) {
+              current = c.target;
+              c.element.innerText = c.target + c.suffix;
+              clearInterval(timer);
+            } else {
+              c.element.innerText = current + c.suffix;
+            }
+          }, 20);
+        });
+      }
+
+      // trigger when impact section is visible
+      const impactSection = document.querySelector('.impact-row');
+      if (impactSection) {
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              startCountUp();
+              observer.disconnect();
+            }
+          });
+        }, { threshold: 0.3 });
+        observer.observe(impactSection);
+      }
+
+      // Hover effect for buttons is already in CSS, but ensure touch devices
+    })();
+  </script>
+  <!-- small fix: on window resize >768, hide mobile menu if open -->
+  <script>
+    window.addEventListener('resize', function() {
+      const navMenu = document.getElementById('navMenu');
+      if (window.innerWidth > 768 && navMenu.classList.contains('show')) {
+        navMenu.classList.remove('show');
+      }
+    });
+  </script>
+</body>
+</html>

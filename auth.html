@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mastery Ecosystem · Sign Up</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet" href="style.css">
+  <script src="theme.js"></script>
+  <style>
+    .auth-root {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: var(--space-8);
+      position: relative;
+      overflow: hidden;
+      background: var(--color-bg-base);
+    }
+
+    .auth-root::before {
+      content: '';
+      position: absolute;
+      width: 640px;
+      height: 640px;
+      background: var(--color-accent);
+      filter: blur(240px);
+      opacity: 0.05;
+      top: -30%;
+      right: -10%;
+      pointer-events: none;
+    }
+
+    .auth-root::after {
+      content: '';
+      position: absolute;
+      width: 400px;
+      height: 400px;
+      background: var(--color-primary);
+      filter: blur(180px);
+      opacity: 0.04;
+      bottom: -20%;
+      left: -5%;
+      pointer-events: none;
+    }
+
+    .auth-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      max-width: 1040px;
+      width: 100%;
+      min-height: 600px;
+      background: var(--color-bg-surface);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-lg);
+      position: relative;
+      z-index: 1;
+      overflow: hidden;
+    }
+
+    @media (max-width: 900px) {
+      .auth-layout { grid-template-columns: 1fr; min-height: auto; }
+      .auth-root { padding: var(--space-4); }
+    }
+
+    /* ------------------------------------------------
+       LEFT PANEL — Brand presence
+    ------------------------------------------------ */
+    .auth-brand {
+      background: var(--color-primary);
+      padding: var(--space-12) var(--space-10);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .auth-brand::before {
+      content: '';
+      position: absolute;
+      width: 500px;
+      height: 500px;
+      background: var(--color-accent);
+      filter: blur(200px);
+      opacity: 0.12;
+      top: -40%;
+      right: -30%;
+      pointer-events: none;
+    }
+
+    .auth-brand::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='30' cy='30' r='28' fill='none' stroke='rgba(255,255,255,0.03)' stroke-width='1'/%3E%3C/svg%3E") repeat;
+      pointer-events: none;
+    }
+
+    .auth-brand-top {
+      position: relative;
+      z-index: 1;
+    }
+
+    .auth-brand-logo {
+      font-family: var(--font-heading);
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: #FFFFFF;
+      letter-spacing: -0.02em;
+      margin-bottom: var(--space-8);
+      display: inline-block;
+    }
+
+    .auth-brand-logo span { color: var(--color-accent); }
+
+    .auth-brand h2 {
+      color: #FFFFFF;
+      font-size: clamp(1.6rem, 2.5vw, 2rem);
+      margin-bottom: var(--space-4);
+      line-height: 1.2;
+    }
+
+    .auth-brand p {
+      color: rgba(255, 255, 255, 0.65);
+      font-size: 0.95rem;
+      line-height: 1.7;
+      margin-bottom: var(--space-8);
+      max-width: 360px;
+    }
+
+    .auth-brand-quote {
+      position: relative;
+      z-index: 1;
+      padding-top: var(--space-6);
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .auth-brand-quote i {
+      color: var(--color-accent);
+      font-size: 1.2rem;
+      margin-bottom: var(--space-3);
+      display: block;
+      opacity: 0.6;
+    }
+
+    .auth-brand-quote blockquote {
+      color: rgba(255, 255, 255, 0.75);
+      font-size: 0.9rem;
+      font-style: italic;
+      line-height: 1.6;
+      margin: 0;
+    }
+
+    .auth-brand-quote cite {
+      color: rgba(255, 255, 255, 0.4);
+      font-size: 0.8rem;
+      font-style: normal;
+      margin-top: var(--space-2);
+      display: block;
+    }
+
+    .auth-brand-bottom {
+      position: relative;
+      z-index: 1;
+    }
+
+    .auth-brand-metrics {
+      display: flex;
+      gap: var(--space-8);
+    }
+
+    .auth-brand-metric-num {
+      font-family: var(--font-heading);
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: #FFFFFF;
+      line-height: 1;
+      margin-bottom: var(--space-1);
+    }
+
+    .auth-brand-metric-label {
+      font-size: 0.75rem;
+      color: rgba(255, 255, 255, 0.5);
+      letter-spacing: 0.3px;
+      text-transform: uppercase;
+    }
+
+    @media (max-width: 900px) {
+      .auth-brand { padding: var(--space-8) var(--space-6); min-height: auto; }
+      .auth-brand h2 { font-size: 1.4rem; }
+      .auth-brand p { max-width: 100%; margin-bottom: var(--space-6); }
+      .auth-brand-quote { display: none; }
+      .auth-brand-metrics { gap: var(--space-6); }
+    }
+
+    @media (max-width: 480px) {
+      .auth-brand-metrics { flex-direction: column; gap: var(--space-4); }
+      .auth-brand { padding: var(--space-6) var(--space-5); }
+    }
+
+    /* ------------------------------------------------
+       RIGHT PANEL — Form
+    ------------------------------------------------ */
+    .auth-panel {
+      padding: var(--space-12) var(--space-10);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    @media (max-width: 900px) {
+      .auth-panel { padding: var(--space-8) var(--space-6); }
+    }
+
+    @media (max-width: 480px) {
+      .auth-panel { padding: var(--space-6) var(--space-5); }
+    }
+
+    .auth-panel-header {
+      margin-bottom: var(--space-8);
+    }
+
+    .auth-panel-header h1 {
+      font-size: 1.6rem;
+      margin-bottom: var(--space-2);
+    }
+
+    .auth-panel-header p {
+      font-size: 0.9rem;
+      color: var(--color-text-secondary);
+      margin: 0;
+    }
+
+    /* Tabs */
+    .auth-tabs {
+      display: flex;
+      gap: var(--space-1);
+      margin-bottom: var(--space-8);
+      background: var(--color-bg-muted);
+      padding: var(--space-1);
+      border-radius: var(--radius-md);
+      position: relative;
+    }
+
+    .auth-tab {
+      flex: 1;
+      padding: var(--space-2) var(--space-4);
+      text-align: center;
+      font-family: var(--font-sans);
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--color-text-secondary);
+      background: transparent;
+      border: none;
+      border-radius: calc(var(--radius-md) - 2px);
+      cursor: pointer;
+      transition: all 300ms cubic-bezier(0.22, 0.61, 0.36, 1);
+      position: relative;
+      z-index: 1;
+    }
+
+    .auth-tab.active {
+      color: var(--color-text);
+      background: var(--color-bg-surface);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .auth-tab:hover:not(.active) {
+      color: var(--color-text);
+    }
+
+    /* Forms */
+    .auth-form {
+      display: none;
+    }
+
+    .auth-form.active {
+      display: block;
+      animation: formIn 350ms cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+    }
+
+    @keyframes formIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .form-row {
+      margin-bottom: var(--space-5);
+    }
+
+    .form-row label {
+      display: block;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--color-text);
+      margin-bottom: var(--space-2);
+      letter-spacing: 0.01em;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 0.7rem 1rem;
+      font-family: var(--font-sans);
+      font-size: 0.92rem;
+      color: var(--color-text);
+      background: var(--color-bg-base);
+      border: 1.5px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      outline: none;
+      transition: border-color 200ms ease, box-shadow 200ms ease;
+      appearance: none;
+    }
+
+    .form-input:focus {
+      border-color: var(--color-accent);
+      box-shadow: 0 0 0 3px rgba(var(--color-accent-rgb), 0.1);
+    }
+
+    .form-input.is-invalid {
+      border-color: #DC2626;
+      box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.08);
+    }
+
+    .form-input.is-valid {
+      border-color: var(--color-accent);
+    }
+
+    .form-input-wrap {
+      position: relative;
+    }
+
+    .form-input-wrap .form-input {
+      padding-right: 2.8rem;
+    }
+
+    .form-toggle-pw {
+      position: absolute;
+      right: 0.6rem;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: var(--color-text-secondary);
+      font-size: 0.95rem;
+      padding: var(--space-1);
+      cursor: pointer;
+      transition: color 200ms ease;
+      line-height: 1;
+    }
+
+    .form-toggle-pw:hover { color: var(--color-accent); }
+
+    .form-feedback {
+      font-size: 0.78rem;
+      margin-top: var(--space-1);
+      display: flex;
+      align-items: center;
+      gap: var(--space-1);
+      height: 0;
+      opacity: 0;
+      transform: translateY(-2px);
+      transition: all 250ms cubic-bezier(0.22, 0.61, 0.36, 1);
+      overflow: hidden;
+    }
+
+    .form-feedback.show {
+      height: 1.2rem;
+      opacity: 1;
+      transform: translateY(0);
+      margin-top: var(--space-1);
+    }
+
+    .form-feedback.success { color: var(--color-accent); }
+    .form-feedback.error { color: #DC2626; }
+
+    .form-feedback i { font-size: 0.7rem; }
+
+    /* Password strength */
+    .pw-strength-wrap {
+      margin-top: var(--space-2);
+      height: 3px;
+      display: flex;
+      gap: 3px;
+      opacity: 0;
+      transition: opacity 300ms ease;
+    }
+
+    .pw-strength-wrap.visible { opacity: 1; }
+
+    .pw-bar {
+      flex: 1;
+      height: 100%;
+      border-radius: 2px;
+      background: var(--color-border);
+      transition: background 300ms ease;
+    }
+
+    .pw-bar.fill-weak { background: #DC2626; }
+    .pw-bar.fill-medium { background: #D97706; }
+    .pw-bar.fill-strong { background: #059669; }
+
+    .pw-label {
+      font-size: 0.72rem;
+      color: var(--color-text-secondary);
+      margin-top: var(--space-1);
+      min-height: 1.1rem;
+      transition: color 300ms ease;
+    }
+
+    /* Select */
+    select.form-input {
+      cursor: pointer;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23475569' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 1rem center;
+      padding-right: 2.5rem;
+    }
+
+    /* Checkbox */
+    .form-checkbox {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-2);
+      margin-bottom: var(--space-6);
+    }
+
+    .form-checkbox input[type="checkbox"] {
+      margin-top: 2px;
+      width: 16px;
+      height: 16px;
+      accent-color: var(--color-accent);
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .form-checkbox label {
+      font-size: 0.82rem;
+      color: var(--color-text-secondary);
+      cursor: pointer;
+      line-height: 1.5;
+    }
+
+    .form-checkbox label a {
+      color: var(--color-accent);
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .form-checkbox label a:hover { text-decoration: underline; }
+
+    /* Submit button */
+    .auth-submit {
+      width: 100%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-2);
+      padding: 0.8rem 1.5rem;
+      font-family: var(--font-sans);
+      font-size: 0.92rem;
+      font-weight: 600;
+      color: #FFFFFF;
+      background: var(--color-accent);
+      border: none;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all 300ms cubic-bezier(0.34, 1.56, 0.64, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .auth-submit:hover {
+      background: var(--color-accent-hover);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 14px rgba(var(--color-accent-rgb), 0.25);
+    }
+
+    .auth-submit:active {
+      transform: scale(0.98) translateY(0);
+    }
+
+    .auth-submit:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .auth-submit-spinner { display: none; }
+    .auth-submit.loading .auth-submit-text { display: none; }
+    .auth-submit.loading .auth-submit-spinner { display: inline; }
+
+    /* Error message */
+    .auth-error {
+      display: none;
+      align-items: center;
+      gap: var(--space-2);
+      padding: var(--space-3) var(--space-4);
+      background: rgba(220, 38, 38, 0.06);
+      border: 1px solid rgba(220, 38, 38, 0.12);
+      border-radius: var(--radius-sm);
+      font-size: 0.84rem;
+      color: #DC2626;
+      margin-bottom: var(--space-5);
+    }
+
+    .auth-error.show { display: flex; }
+
+    .auth-error i { font-size: 0.85rem; flex-shrink: 0; }
+
+    /* Alt link */
+    .auth-alt {
+      text-align: center;
+      margin-top: var(--space-6);
+      font-size: 0.85rem;
+      color: var(--color-text-secondary);
+    }
+
+    .auth-alt a {
+      color: var(--color-accent);
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+      transition: color 200ms ease;
+    }
+
+    .auth-alt a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="auth-root">
+    <div class="auth-layout">
+
+      <!-- LEFT — Brand -->
+      <div class="auth-brand">
+        <div class="auth-brand-top">
+          <div class="auth-brand-logo">Mastery <span>Ecosystem</span></div>
+          <h2>Every great journey starts with a single step.</h2>
+          <p>Join a growing community of young Malawians turning raw talent into real impact — no degree needed, just drive.</p>
+        </div>
+
+        <div class="auth-brand-quote">
+          <i class="fas fa-quote-left"></i>
+          <blockquote>Before Mastery Ecosystem, I didn&rsquo;t think farming could be a tech career. Now I build irrigation sensors for my whole village.</blockquote>
+          <cite>&mdash; Grace M., Class of 2025</cite>
+        </div>
+
+        <div class="auth-brand-bottom">
+          <div class="auth-brand-metrics">
+            <div>
+              <div class="auth-brand-metric-num">150+</div>
+              <div class="auth-brand-metric-label">Youth skilled</div>
+            </div>
+            <div>
+              <div class="auth-brand-metric-num">12</div>
+              <div class="auth-brand-metric-label">Industry partners</div>
+            </div>
+            <div>
+              <div class="auth-brand-metric-num">8</div>
+              <div class="auth-brand-metric-label">Ventures launched</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT — Form -->
+      <div class="auth-panel">
+        <div class="auth-panel-header">
+          <h1>Welcome back</h1>
+          <p>Sign in to continue, or create an account if you&rsquo;re new here.</p>
+        </div>
+
+        <div class="auth-tabs">
+          <button class="auth-tab active" data-tab="signin">Sign In</button>
+          <button class="auth-tab" data-tab="signup">Sign Up</button>
+        </div>
+
+        <div class="auth-error" id="authError">
+          <i class="fas fa-exclamation-circle"></i>
+          <span id="authErrorText"></span>
+        </div>
+
+        <!-- SIGN IN -->
+        <div class="auth-form active" id="formSignIn">
+          <form id="signInForm" novalidate>
+            <div class="form-row">
+              <label for="siEmail">Email address</label>
+              <input type="email" class="form-input" id="siEmail" placeholder="you@example.com" autocomplete="email">
+              <div class="form-feedback" id="siEmailFeedback"></div>
+            </div>
+
+            <div class="form-row">
+              <label for="siPassword">Password</label>
+              <div class="form-input-wrap">
+                <input type="password" class="form-input" id="siPassword" placeholder="Enter your password" autocomplete="current-password">
+                <button type="button" class="form-toggle-pw" id="siPwToggle" aria-label="Toggle visibility"><i class="fas fa-eye"></i></button>
+              </div>
+              <div class="form-feedback" id="siPasswordFeedback"></div>
+            </div>
+
+            <button type="submit" class="auth-submit" id="siSubmitBtn">
+              <span class="auth-submit-text">Sign In</span>
+              <span class="auth-submit-spinner"><i class="fas fa-circle-notch fa-spin"></i></span>
+            </button>
+          </form>
+
+          <div class="auth-alt">
+            Don&rsquo;t have an account? <a id="switchToSignUp">Create one</a>
+          </div>
+        </div>
+
+        <!-- SIGN UP -->
+        <div class="auth-form" id="formSignUp">
+          <form id="signUpForm" novalidate>
+            <div class="form-row">
+              <label for="suName">Full name</label>
+              <input type="text" class="form-input" id="suName" placeholder="e.g. Temwa Gondwe" autocomplete="name">
+              <div class="form-feedback" id="suNameFeedback"></div>
+            </div>
+
+            <div class="form-row">
+              <label for="suEmail">Email address</label>
+              <input type="email" class="form-input" id="suEmail" placeholder="you@example.com" autocomplete="email">
+              <div class="form-feedback" id="suEmailFeedback"></div>
+            </div>
+
+            <div class="form-row">
+              <label for="suPhone">Phone number <span style="color: var(--color-text-secondary); font-weight: 400;">(optional)</span></label>
+              <input type="tel" class="form-input" id="suPhone" placeholder="+265 99 123 4567" autocomplete="tel">
+            </div>
+
+            <div class="form-row">
+              <label for="suDistrict">District <span style="color: var(--color-text-secondary); font-weight: 400;">(optional)</span></label>
+              <select class="form-input" id="suDistrict">
+                <option value="" disabled selected>Select your district</option>
+                <option value="Balaka">Balaka</option>
+                <option value="Blantyre">Blantyre</option>
+                <option value="Chikwawa">Chikwawa</option>
+                <option value="Chiradzulu">Chiradzulu</option>
+                <option value="Chitipa">Chitipa</option>
+                <option value="Dedza">Dedza</option>
+                <option value="Dowa">Dowa</option>
+                <option value="Karonga">Karonga</option>
+                <option value="Kasungu">Kasungu</option>
+                <option value="Likoma">Likoma</option>
+                <option value="Lilongwe">Lilongwe</option>
+                <option value="Machinga">Machinga</option>
+                <option value="Mangochi">Mangochi</option>
+                <option value="Mchinji">Mchinji</option>
+                <option value="Mulanje">Mulanje</option>
+                <option value="Mwanza">Mwanza</option>
+                <option value="Mzimba">Mzimba</option>
+                <option value="Neno">Neno</option>
+                <option value="Nkhata Bay">Nkhata Bay</option>
+                <option value="Nkhotakota">Nkhotakota</option>
+                <option value="Nsanje">Nsanje</option>
+                <option value="Ntcheu">Ntcheu</option>
+                <option value="Ntchisi">Ntchisi</option>
+                <option value="Phalombe">Phalombe</option>
+                <option value="Rumphi">Rumphi</option>
+                <option value="Salima">Salima</option>
+                <option value="Thyolo">Thyolo</option>
+                <option value="Zomba">Zomba</option>
+              </select>
+            </div>
+
+            <div class="form-row">
+              <label for="suPassword">Password</label>
+              <div class="form-input-wrap">
+                <input type="password" class="form-input" id="suPassword" placeholder="Create a strong password" autocomplete="new-password">
+                <button type="button" class="form-toggle-pw" id="suPwToggle" aria-label="Toggle visibility"><i class="fas fa-eye"></i></button>
+              </div>
+              <div class="pw-strength-wrap" id="pwStrengthWrap">
+                <div class="pw-bar" id="pwBar1"></div>
+                <div class="pw-bar" id="pwBar2"></div>
+                <div class="pw-bar" id="pwBar3"></div>
+              </div>
+              <div class="pw-label" id="pwStrengthLabel"></div>
+              <div class="form-feedback" id="suPasswordFeedback"></div>
+            </div>
+
+            <div class="form-row">
+              <label for="suConfirm">Confirm password</label>
+              <input type="password" class="form-input" id="suConfirm" placeholder="Re-enter your password" autocomplete="new-password">
+              <div class="form-feedback" id="suConfirmFeedback"></div>
+            </div>
+
+            <div class="form-checkbox">
+              <input type="checkbox" id="suTerms">
+              <label for="suTerms">I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a></label>
+            </div>
+
+            <button type="submit" class="auth-submit" id="suSubmitBtn">
+              <span class="auth-submit-text">Create your account</span>
+              <span class="auth-submit-spinner"><i class="fas fa-circle-notch fa-spin"></i></span>
+            </button>
+          </form>
+
+          <div class="auth-alt">
+            Already have an account? <a id="switchToSignIn">Sign in</a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      /* ---- Tab switching ---- */
+      var tabs = document.querySelectorAll('.auth-tab');
+      var forms = {
+        signin: document.getElementById('formSignIn'),
+        signup: document.getElementById('formSignUp')
+      };
+      var panelHeader = document.querySelector('.auth-panel-header');
+      var headerTexts = {
+        signin: { h1: 'Welcome back', p: 'Sign in to continue, or create an account if you&rsquo;re new here.' },
+        signup: { h1: 'Join the movement', p: 'Create your account and start your journey with Mastery Ecosystem.' }
+      };
+
+      function switchTab(tabId) {
+        tabs.forEach(function(t) { t.classList.remove('active'); });
+        document.querySelector('[data-tab="' + tabId + '"]').classList.add('active');
+        Object.keys(forms).forEach(function(k) { forms[k].classList.remove('active'); });
+        forms[tabId].classList.add('active');
+        if (panelHeader && headerTexts[tabId]) {
+          panelHeader.querySelector('h1').innerHTML = headerTexts[tabId].h1;
+          panelHeader.querySelector('p').innerHTML = headerTexts[tabId].p;
+        }
+        errorBox.classList.remove('show');
+        clearAllFeedbacks();
+      }
+
+      tabs.forEach(function(tab) {
+        tab.addEventListener('click', function() { switchTab(this.dataset.tab); });
+      });
+
+      document.getElementById('switchToSignUp').addEventListener('click', function(e) { e.preventDefault(); switchTab('signup'); });
+      document.getElementById('switchToSignIn').addEventListener('click', function(e) { e.preventDefault(); switchTab('signin'); });
+
+      /* ---- Error display ---- */
+      var errorBox = document.getElementById('authError');
+      var errorText = document.getElementById('authErrorText');
+      function showError(msg) { errorText.textContent = msg; errorBox.classList.add('show'); }
+      function clearError() { errorBox.classList.remove('show'); }
+
+      /* ---- Password toggle ---- */
+      function setupPwToggle(inputId, toggleId) {
+        var input = document.getElementById(inputId);
+        var toggle = document.getElementById(toggleId);
+        if (input && toggle) {
+          toggle.addEventListener('click', function() {
+            var isPassword = input.type === 'password';
+            input.type = isPassword ? 'text' : 'password';
+            toggle.innerHTML = isPassword ? '<i class="fas fa-eye-slash"></i>' : '<i class="fas fa-eye"></i>';
+          });
+        }
+      }
+      setupPwToggle('suPassword', 'suPwToggle');
+      setupPwToggle('siPassword', 'siPwToggle');
+
+      /* ---- Password strength ---- */
+      var pwInput = document.getElementById('suPassword');
+      var pwWrap = document.getElementById('pwStrengthWrap');
+      var bars = [
+        document.getElementById('pwBar1'),
+        document.getElementById('pwBar2'),
+        document.getElementById('pwBar3')
+      ];
+      var pwLabel = document.getElementById('pwStrengthLabel');
+
+      pwInput.addEventListener('input', function() {
+        var val = this.value;
+        if (val.length === 0) { pwWrap.classList.remove('visible'); pwLabel.textContent = ''; return; }
+        pwWrap.classList.add('visible');
+        var score = 0;
+        if (val.length >= 6) score++;
+        if (val.length >= 10) score++;
+        if (/[A-Z]/.test(val) && /[0-9]/.test(val)) score++;
+
+        var fills = ['', 'fill-weak', 'fill-medium', 'fill-strong'];
+        var labels = ['', 'Weak — try adding numbers and uppercase letters', 'Getting there, add a few more characters', 'Strong password'];
+
+        bars.forEach(function(bar, i) {
+          bar.className = 'pw-bar';
+          if (i < score) bar.classList.add(fills[score]);
+        });
+        pwLabel.textContent = labels[score] || '';
+        pwLabel.style.color = score === 3 ? '#059669' : score >= 2 ? '#D97706' : '#DC2626';
+      });
+
+      /* ---- Field validation helpers ---- */
+      function getFeedback(id) { return document.getElementById(id); }
+      function setValid(fb, msg) { fb.className = 'form-feedback show success'; fb.innerHTML = '<i class="fas fa-check-circle"></i> ' + msg; }
+      function setInvalid(fb, msg) { fb.className = 'form-feedback show error'; fb.innerHTML = '<i class="fas fa-exclamation-circle"></i> ' + msg; }
+      function clearFb(fb) { fb.className = 'form-feedback'; fb.innerHTML = ''; }
+      function clearAllFeedbacks() {
+        document.querySelectorAll('.form-feedback').forEach(function(f) { f.className = 'form-feedback'; f.innerHTML = ''; });
+        document.querySelectorAll('.form-input').forEach(function(i) { i.classList.remove('is-valid', 'is-invalid'); });
+        if (pwWrap) pwWrap.classList.remove('visible');
+        if (pwLabel) pwLabel.textContent = '';
+      }
+
+      function validateName(val) { return val.trim().length >= 2; }
+      function validateEmail(val) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val); }
+      function validatePassword(val) { return val.length >= 6; }
+
+      /* ---- Sign In ---- */
+      var siEmail = document.getElementById('siEmail');
+      var siPassword = document.getElementById('siPassword');
+      var fbSiEmail = getFeedback('siEmailFeedback');
+      var fbSiPassword = getFeedback('siPasswordFeedback');
+
+      siEmail.addEventListener('blur', function() {
+        if (!this.value.trim()) { clearFb(fbSiEmail); return; }
+        if (validateEmail(this.value)) { this.classList.add('is-valid'); setValid(fbSiEmail, 'Email looks good'); }
+        else { this.classList.add('is-invalid'); setInvalid(fbSiEmail, 'Please enter a valid email'); }
+      });
+
+      document.getElementById('signInForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        clearError();
+        var valid = true;
+        if (!validateEmail(siEmail.value)) { siEmail.classList.add('is-invalid'); setInvalid(fbSiEmail, 'Please enter a valid email'); valid = false; }
+        if (!siPassword.value.trim()) { siPassword.classList.add('is-invalid'); setInvalid(fbSiPassword, 'Please enter your password'); valid = false; }
+        if (!valid) return;
+
+        var btn = document.getElementById('siSubmitBtn');
+        btn.classList.add('loading');
+        btn.disabled = true;
+
+        fetch('/api/auth/signin', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: siEmail.value.trim(), password: siPassword.value })
+        })
+        .then(function(r) { return r.json().then(function(d) { return { status: r.status, data: d }; }); })
+        .then(function(res) {
+          if (res.status === 200) {
+            localStorage.setItem('auth_token', res.data.token);
+            localStorage.setItem('auth_user', JSON.stringify(res.data.user));
+            window.location.href = 'profile.html';
+          } else {
+            showError(res.data.error || 'Invalid email or password');
+            btn.classList.remove('loading');
+            btn.disabled = false;
+          }
+        })
+        .catch(function() {
+          showError('Connection error. Please try again.');
+          btn.classList.remove('loading');
+          btn.disabled = false;
+        });
+      });
+
+      /* ---- Sign Up ---- */
+      var suName = document.getElementById('suName');
+      var suEmail = document.getElementById('suEmail');
+      var suPassword = document.getElementById('suPassword');
+      var suConfirm = document.getElementById('suConfirm');
+      var suTerms = document.getElementById('suTerms');
+
+      var fbSuName = getFeedback('suNameFeedback');
+      var fbSuEmail = getFeedback('suEmailFeedback');
+      var fbSuPassword = getFeedback('suPasswordFeedback');
+      var fbSuConfirm = getFeedback('suConfirmFeedback');
+
+      suName.addEventListener('blur', function() {
+        if (!this.value.trim()) { clearFb(fbSuName); return; }
+        if (validateName(this.value)) { this.classList.add('is-valid'); setValid(fbSuName, 'Nice to meet you, ' + this.value.split(' ')[0] + '!'); }
+        else { this.classList.add('is-invalid'); setInvalid(fbSuName, 'Please enter your full name'); }
+      });
+
+      suEmail.addEventListener('blur', function() {
+        if (!this.value.trim()) { clearFb(fbSuEmail); return; }
+        if (validateEmail(this.value)) { this.classList.add('is-valid'); setValid(fbSuEmail, 'We&rsquo;ll never share this'); }
+        else { this.classList.add('is-invalid'); setInvalid(fbSuEmail, 'Please enter a valid email'); }
+      });
+
+      suConfirm.addEventListener('input', function() {
+        if (!this.value.trim()) { clearFb(fbSuConfirm); return; }
+        if (this.value === suPassword.value) { this.classList.add('is-valid'); setValid(fbSuConfirm, 'Passwords match'); }
+        else { this.classList.add('is-invalid'); setInvalid(fbSuConfirm, 'Passwords don&rsquo;t match'); }
+      });
+
+      suConfirm.addEventListener('blur', function() {
+        if (!this.value.trim()) { clearFb(fbSuConfirm); return; }
+        if (this.value === suPassword.value) { this.classList.add('is-valid'); setValid(fbSuConfirm, 'Passwords match'); }
+        else { this.classList.add('is-invalid'); setInvalid(fbSuConfirm, 'Passwords don&rsquo;t match'); }
+      });
+
+      document.getElementById('signUpForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        clearError();
+        var valid = true;
+
+        if (!validateName(suName.value)) { suName.classList.add('is-invalid'); setInvalid(fbSuName, 'Please enter your full name'); valid = false; }
+        if (!validateEmail(suEmail.value)) { suEmail.classList.add('is-invalid'); setInvalid(fbSuEmail, 'Please enter a valid email'); valid = false; }
+        if (!validatePassword(suPassword.value)) { suPassword.classList.add('is-invalid'); setInvalid(fbSuPassword, 'At least 6 characters required'); valid = false; }
+        if (suPassword.value !== suConfirm.value) { suConfirm.classList.add('is-invalid'); setInvalid(fbSuConfirm, 'Passwords don&rsquo;t match'); valid = false; }
+        if (!suTerms.checked) { showError('Please agree to the Terms of Service before continuing.'); valid = false; }
+        if (!valid) return;
+
+        var btn = document.getElementById('suSubmitBtn');
+        btn.classList.add('loading');
+        btn.disabled = true;
+
+        var payload = {
+          full_name: suName.value.trim(),
+          email: suEmail.value.trim(),
+          phone: document.getElementById('suPhone').value.trim(),
+          password: suPassword.value,
+          district: document.getElementById('suDistrict').value
+        };
+
+        fetch('/api/auth/signup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        })
+        .then(function(r) { return r.json().then(function(d) { return { status: r.status, data: d }; }); })
+        .then(function(res) {
+          if (res.status === 201) {
+            localStorage.setItem('auth_token', res.data.token);
+            localStorage.setItem('auth_user', JSON.stringify(res.data.user));
+            window.location.href = 'profile.html';
+          } else {
+            showError(res.data.error || 'Signup failed. Please try again.');
+            btn.classList.remove('loading');
+            btn.disabled = false;
+          }
+        })
+        .catch(function() {
+          showError('Connection error. Please check your internet and try again.');
+          btn.classList.remove('loading');
+          btn.disabled = false;
+        });
+      });
+    })();
+  </script>
+</body>
+</html>

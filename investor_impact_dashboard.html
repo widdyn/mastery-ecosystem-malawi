@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mastery Ecosystem · Investor Impact</title>
+  <!-- Google Fonts, Font Awesome, and Chart.js -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="style.css">
+  <script src="theme.js"></script>
+  <style>
+    .section {
+      margin: var(--space-12) 0;
+    }
+
+    /* metric cards */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: var(--space-6);
+      margin: var(--space-8) 0;
+    }
+    .metric-card {
+      text-align: center;
+    }
+    .metric-icon {
+      font-size: 2.5rem;
+      color: var(--color-accent);
+      margin-bottom: var(--space-3);
+    }
+    .metric-number {
+      font-size: clamp(2.2rem, 4vw, 3rem);
+      font-weight: 800;
+      color: var(--color-primary);
+      line-height: 1.1;
+      font-family: var(--font-heading);
+      letter-spacing: -0.02em;
+    }
+    .dark-theme .metric-number {
+      color: var(--color-text);
+    }
+    .metric-label {
+      font-size: 0.95rem;
+      color: var(--color-text-secondary);
+      margin-top: var(--space-2);
+      font-weight: 500;
+    }
+
+    /* success stories */
+    .stories-grid {
+      display: flex;
+      gap: var(--space-6);
+      flex-wrap: wrap;
+      margin: var(--space-8) 0;
+    }
+    .story-card {
+      flex: 1 1 280px;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-4);
+    }
+    .story-header {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+    }
+    .story-avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: var(--radius-full);
+      background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #FFFFFF;
+      font-weight: 700;
+      font-size: 1.25rem;
+      border: 2px solid var(--color-border);
+    }
+    .story-badge {
+      background: var(--color-accent);
+      color: #FFFFFF;
+      padding: 0.25rem 0.85rem;
+      border-radius: var(--radius-full);
+      font-size: 0.75rem;
+      font-weight: 700;
+      align-self: flex-start;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .story-link {
+      color: var(--color-accent);
+      font-weight: 700;
+      text-decoration: none;
+      margin-top: auto;
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-1);
+      transition: var(--transition-fast);
+    }
+    .story-link i {
+      transition: transform 0.2s;
+    }
+    .story-link:hover i {
+      transform: translateX(4px);
+    }
+
+    /* fund breakdown two-col */
+    .fund-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-12);
+      align-items: center;
+    }
+    .chart-container {
+      background: var(--color-bg-surface);
+      border-radius: var(--radius-lg);
+      padding: var(--space-6);
+      box-shadow: var(--shadow-card);
+      border: 1px solid var(--color-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .legend-list {
+      list-style: none;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: var(--space-4);
+      margin-bottom: var(--space-4);
+      font-size: 1.05rem;
+      color: var(--color-text);
+    }
+    .color-dot {
+      width: 16px;
+      height: 16px;
+      border-radius: 4px;
+      display: inline-block;
+    }
+    .legend-percent {
+      font-weight: 700;
+      color: var(--color-primary);
+      margin-left: auto;
+    }
+    .dark-theme .legend-percent {
+      color: var(--color-accent);
+    }
+    .small-note {
+      margin-top: var(--space-4);
+      font-style: italic;
+      color: var(--color-text-secondary);
+    }
+
+    /* investment tiers */
+    .tiers-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--space-6);
+      margin: var(--space-8) 0;
+    }
+    .tier-card {
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      height: 100%;
+    }
+    .tier-card i {
+      font-size: 2.5rem;
+      color: var(--color-accent);
+      margin-bottom: var(--space-3);
+    }
+    .tier-amount {
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--color-primary);
+      margin: var(--space-2) 0 var(--space-4);
+      font-family: var(--font-heading);
+    }
+    .dark-theme .tier-amount {
+      color: var(--color-accent);
+    }
+    .tier-description {
+      margin-bottom: var(--space-6);
+      flex: 1;
+    }
+
+    /* detailed impact */
+    .deep-impact {
+      background: var(--color-bg-muted);
+      border-radius: var(--radius-xl);
+      padding: var(--space-12) var(--space-8);
+      margin: var(--space-12) 0;
+      border: 1px solid var(--color-border);
+    }
+    .impact-stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: var(--space-6);
+      margin-top: var(--space-8);
+    }
+    .stat-item {
+      text-align: center;
+    }
+    .stat-number {
+      font-size: clamp(2rem, 5vw, 2.75rem);
+      font-weight: 800;
+      color: var(--color-primary);
+      font-family: var(--font-heading);
+      letter-spacing: -0.02em;
+    }
+    .dark-theme .stat-number {
+      color: var(--color-accent);
+    }
+    .stat-label {
+      color: var(--color-text-secondary);
+      font-size: 0.95rem;
+      font-weight: 500;
+    }
+
+    .cta-large {
+      text-align: center;
+      background: linear-gradient(135deg, var(--color-primary) 0%, #081D29 100%);
+      border-radius: var(--radius-xl);
+      padding: var(--space-16) var(--space-8);
+      color: #FFFFFF;
+      margin: var(--space-16) 0;
+      border: 1px solid var(--color-border);
+      box-shadow: var(--shadow-lg);
+    }
+    .cta-large h2 {
+      color: #FFFFFF;
+      margin-bottom: var(--space-4);
+    }
+
+    @media (max-width: 992px) {
+      .metrics-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--space-4);
+      }
+      .fund-grid {
+        grid-template-columns: 1fr;
+        gap: var(--space-6);
+      }
+      .tiers-grid {
+        grid-template-columns: 1fr;
+      }
+      .chart-row {
+        grid-template-columns: 1fr;
+        gap: var(--space-6);
+      }
+    }
+    @media (max-width: 480px) {
+      .metrics-grid {
+        grid-template-columns: 1fr;
+        gap: var(--space-4);
+      }
+      .metric-card {
+        padding: var(--space-6) var(--space-4);
+      }
+      .metric-number {
+        font-size: 2.2rem;
+      }
+      .chart-container {
+        padding: var(--space-4);
+      }
+      .tier-card {
+        padding: var(--space-6) var(--space-4);
+      }
+      .success-story-card {
+        padding: var(--space-6) var(--space-4);
+      }
+      .investor-cta .btn {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation (same) -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="index.html" class="logo">Mastery <span>Ecosystem</span></a>
+      <button class="hamburger" id="hamburgerBtn" aria-label="Menu"><i class="fas fa-bars"></i></button>
+      <ul class="nav-menu" id="navMenu">
+        <li><a href="Our_model.html">Our Model</a></li>
+        <li><a href="talent_map.html">Talent Map</a></li>
+        <li><a href="investor_impact_dashboard.html">Investor Impact</a></li>
+        <li><a href="manifesto.html">Manifesto</a></li>
+        <li><a href="About_us.html">About</a></li>
+        <li><a href="contact.html">Contact</a></li>
+        <li class="nav-auth-item"><a href="auth.html" class="nav-auth-link">Sign Up</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main>
+    <!-- 1. Page Title & Intro -->
+    <div class="container" style="margin-top: var(--space-12);">
+      <h1>Fuel Malawi’s Industrial Revolution</h1>
+      <p class="section-subhead">Your capital creates measurable impact. See exactly where every kwacha goes and the lives it changes.</p>
+      <p style="margin-bottom: var(--space-8);">We believe in radical transparency. Below is a live snapshot of our ecosystem—updated quarterly.</p>
+    </div>
+
+    <!-- 2. Key Impact Metrics (top row) -->
+    <div class="container">
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <div class="metric-icon"><i class="fas fa-coins"></i></div>
+          <div class="metric-number" id="metricFunds" data-target="45000000">0</div>
+          <div class="metric-label">Total funds deployed (MWK)</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-icon"><i class="fas fa-users"></i></div>
+          <div class="metric-number" id="metricYouth" data-target="156">0</div>
+          <div class="metric-label">Youth trained across all sprints</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-icon"><i class="fas fa-rocket"></i></div>
+          <div class="metric-number" id="metricStartups" data-target="12">0</div>
+          <div class="metric-label">New ventures launched by graduates</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-icon"><i class="fas fa-briefcase"></i></div>
+          <div class="metric-number" id="metricJobs" data-target="48">0</div>
+          <div class="metric-label">Jobs created (direct & indirect)</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. Featured Success Stories -->
+    <div class="container section">
+      <h2>From Trainee to Entrepreneur</h2>
+      <div class="stories-grid">
+        <div class="story-card">
+          <span class="story-badge"><i class="fas fa-bolt"></i> Solar Installation</span>
+          <div class="story-header">
+            <div class="story-avatar">K</div>
+            <div><strong>Kondwani, 24</strong><br>Mchinji</div>
+          </div>
+          <p>“Used his investment to start a solar repair shop – now employs 3 others.”</p>
+          <a href="#" class="story-link">Read more <i class="fas fa-arrow-right"></i></a>
+        </div>
+        <div class="story-card">
+          <span class="story-badge"><i class="fas fa-leaf"></i> Agri‑tech</span>
+          <div class="story-header">
+            <div class="story-avatar">C</div>
+            <div><strong>Chisomo, 22</strong><br>Lilongwe</div>
+          </div>
+          <p>“Developed a low‑cost drip irrigation kit; now supplying 50 smallholder farmers.”</p>
+          <a href="#" class="story-link">Read more <i class="fas fa-arrow-right"></i></a>
+        </div>
+        <div class="story-card">
+          <span class="story-badge"><i class="fas fa-code"></i> Coding</span>
+          <div class="story-header">
+            <div class="story-avatar">T</div>
+            <div><strong>Tione, 26</strong><br>Dedza</div>
+          </div>
+          <p>“Built a mobile money tracker; hired two assistants and expanded to Salima.”</p>
+          <a href="#" class="story-link">Read more <i class="fas fa-arrow-right"></i></a>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. How We Use Funds (Breakdown + donut chart) -->
+    <div class="container section">
+      <h2>Where Your Money Goes</h2>
+      <div class="fund-grid">
+        <div class="chart-container">
+          <canvas id="fundsChart" width="300" height="300" style="max-width: 100%; height: auto;"></canvas>
+        </div>
+        <div>
+          <ul class="legend-list">
+            <li class="legend-item"><span class="color-dot" style="background:#4CAF50;"></span> Mastery Sprints <span class="legend-percent">40%</span></li>
+            <li class="legend-item"><span class="color-dot" style="background:#0A2F44;"></span> Hubs <span class="legend-percent">30%</span></li>
+            <li class="legend-item"><span class="color-dot" style="background:#FFB347;"></span> Talent Safaris <span class="legend-percent">20%</span></li>
+            <li class="legend-item"><span class="color-dot" style="background:#9CA3AF;"></span> Operations <span class="legend-percent">10%</span></li>
+          </ul>
+          <p class="small-note"><i class="fas fa-heart" style="color: var(--vibrant-green);"></i> We keep overhead low. Every contribution above 10% goes directly to programs.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5. Investment Tiers -->
+    <div class="container section">
+      <h2>Ways to Invest</h2>
+      <div class="tiers-grid">
+        <div class="tier-card">
+          <i class="fas fa-bolt" style="font-size: 2.5rem; color: var(--vibrant-green);"></i>
+          <div class="tier-amount">MWK 5M</div>
+          <h3>Sponsor a Sprint</h3>
+          <p class="tier-description">Fund a full 6‑week sprint for 20 youth in a high‑demand skill. You’ll receive progress reports and can meet the cohort.</p>
+           <a href="#" class="btn btn-primary btn-block-mobile">Sponsor Now</a>
+          </div>
+        </div>
+        <div class="tier-card">
+          <i class="fas fa-city" style="font-size: 2.5rem; color: var(--vibrant-green);"></i>
+          <div class="tier-amount">MWK 25M</div>
+          <h3>Hub Adoption Package</h3>
+          <p class="tier-description">Fund the construction and operation of a complete Mastery Hub in a high-need district. Each hub serves 500+ learners annually.</p>
+          <a href="#" class="btn btn-primary btn-block-mobile">Adopt a Hub</a>
+        </div>
+        <div class="tier-card">
+          <i class="fas fa-graduation-cap" style="font-size: 2.5rem; color: var(--vibrant-green);"></i>
+          <div class="tier-amount">MWK 150K</div>
+          <h3>Scholar & Mentor Fund</h3>
+          <p class="tier-description">Sponsor individual learners through their mastery journey. Each MWK 150,000 covers a complete 3-year program including materials and mentorship.</p>
+          <a href="#" class="btn btn-primary btn-block-mobile">Express Interest</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- 6. Detailed Impact Breakdown -->
+    <div class="container">
+      <div class="deep-impact">
+        <h2 style="margin-bottom: var(--space-8);">Deep Dive: Impact by the Numbers</h2>
+        <div class="impact-stats-grid">
+          <div class="stat-item"><span class="stat-number">8</span><div class="stat-label">Sprints completed</div></div>
+          <div class="stat-item"><span class="stat-number">3</span><div class="stat-label">Sprints in progress</div></div>
+          <div class="stat-item"><span class="stat-number">15</span><div class="stat-label">Companies engaged</div></div>
+          <div class="stat-item"><span class="stat-number">142</span><div class="stat-label">Mastery Badges issued</div></div>
+          <div class="stat-item"><span class="stat-number">300%</span><div class="stat-label">Avg. post‑sprint income increase</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 7. Call‑to‑Action: Become a Partner -->
+    <div class="container">
+      <div class="cta-large">
+        <h2>Ready to power the next generation of Malawian industrialists?</h2>
+        <div style="display: flex; gap: var(--space-6); justify-content: center; flex-wrap: wrap; margin-top: var(--space-8);">
+          <a href="#" class="btn btn-primary btn-block-mobile" style="background: white; color: var(--deep-blue);">Invest Now</a>
+          <a href="#" class="btn btn-outline btn-block-mobile" style="border-color: white; color: white;">Download Impact Report</a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer (same) -->
+  <footer>
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <div class="footer-logo">Mastery <span>Ecosystem</span></div>
+          <p style="color: #cfdfea; margin-bottom: var(--space-6);">From learning to impact – uniting Malawi’s talent with industry.</p>
+          <div class="social-icons">
+            <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+            <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+            <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+            <a href="#" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+          </div>
+        </div>
+        <div class="footer-links">
+          <h4 style="color: white; margin-bottom: var(--space-4);">Explore</h4>
+          <a href="Our_model.html">Our Model</a>
+          <a href="talent_map.html">Talent Map</a>
+          <a href="investor_impact_dashboard.html">Investor Impact</a>
+          <a href="manifesto.html">Manifesto</a>
+        </div>
+        <div class="footer-links">
+          <h4 style="color: white; margin-bottom: var(--space-4);">Connect</h4>
+          <a href="About_us.html">About</a>
+          <a href="contact.html">Contact</a>
+          <a href="#">Blog</a>
+        </div>
+        <div>
+          <h4 style="color: white; margin-bottom: var(--space-4);">Contact</h4>
+          <p><i class="fas fa-envelope" style="margin-right: var(--space-2); color: var(--vibrant-green);"></i> info@masteryecosystem.mw</p>
+          <p><i class="fas fa-map-pin" style="margin-right: var(--space-2); color: var(--vibrant-green);"></i> Area 47, Lilongwe, Malawi</p>
+        </div>
+      </div>
+      <div class="copyright">
+        © 2026 Mastery Ecosystem. All rights reserved.
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    (function() {
+      // ---------- Hamburger menu ----------
+      const hamburger = document.getElementById('hamburgerBtn');
+      const navMenu = document.getElementById('navMenu');
+      if (hamburger && navMenu) {
+        hamburger.addEventListener('click', (e) => {
+          e.stopPropagation();
+          navMenu.classList.toggle('show');
+        });
+        navMenu.querySelectorAll('a').forEach(link => {
+          link.addEventListener('click', () => {
+            if (window.innerWidth <= 768) navMenu.classList.remove('show');
+          });
+        });
+      }
+      window.addEventListener('resize', () => {
+        if (window.innerWidth > 768 && navMenu?.classList.contains('show')) {
+          navMenu.classList.remove('show');
+        }
+      });
+
+      // ---------- Chart.js donut chart ----------
+      const ctx = document.getElementById('fundsChart').getContext('2d');
+      new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: ['Mastery Sprints', 'Hubs', 'Talent Safaris', 'Operations'],
+          datasets: [{
+            data: [40, 30, 20, 10],
+            backgroundColor: ['#4CAF50', '#0A2F44', '#FFB347', '#9CA3AF'],
+            borderWidth: 0,
+          }]
+        },
+        options: {
+          cutout: '70%',
+          plugins: {
+            legend: { display: false },
+            tooltip: { callbacks: { label: (ctx) => `${ctx.raw}%` } }
+          },
+          maintainAspectRatio: true,
+        }
+      });
+
+      // ---------- Count-up animation (on scroll) ----------
+      const metricElements = [
+        { el: document.getElementById('metricFunds'), target: 45000000, suffix: '' },
+        { el: document.getElementById('metricYouth'), target: 156, suffix: '' },
+        { el: document.getElementById('metricStartups'), target: 12, suffix: '' },
+        { el: document.getElementById('metricJobs'), target: 48, suffix: '' }
+      ];
+      // format funds with commas
+      const formatNumber = (num) => {
+        if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+        return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+      };
+      // Set initial display to 0
+      metricElements.forEach(m => { m.el.innerText = '0'; });
+
+      let countingStarted = false;
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting && !countingStarted) {
+            countingStarted = true;
+            metricElements.forEach(m => {
+              let current = 0;
+              const target = m.target;
+              const step = Math.ceil(target / 50); // increment step
+              const timer = setInterval(() => {
+                current += step;
+                if (current >= target) {
+                  current = target;
+                  m.el.innerText = m.el.id === 'metricFunds' ? formatNumber(current) : current;
+                  clearInterval(timer);
+                } else {
+                  m.el.innerText = m.el.id === 'metricFunds' ? formatNumber(current) : current;
+                }
+              }, 20);
+            });
+            observer.disconnect();
+          }
+        });
+      }, { threshold: 0.3 });
+
+      const metricsRow = document.querySelector('.metrics-grid');
+      if (metricsRow) observer.observe(metricsRow);
+    })();
+  </script>
+</body>
+</html>

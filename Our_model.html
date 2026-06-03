@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mastery Ecosystem · Our Model</title>
+  <!-- Google Fonts & Font Awesome -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet" href="style.css">
+  <script src="theme.js"></script>
+  <style>
+    .section {
+      margin: var(--space-12) 0;
+    }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-12);
+      align-items: center;
+    }
+
+    /* problem visual */
+    .stat-visual {
+      background: var(--color-bg-muted);
+      border-radius: var(--radius-lg);
+      padding: var(--space-8);
+      border: 1px solid var(--color-border);
+    }
+    .stat-bar {
+      display: flex;
+      align-items: center;
+      gap: var(--space-4);
+      margin: var(--space-4) 0;
+    }
+    .bar-label {
+      width: 130px;
+      font-weight: 700;
+      color: var(--color-text);
+    }
+    .bar-bg {
+      flex: 1;
+      height: 24px;
+      background: var(--color-bg-base);
+      border-radius: var(--radius-full);
+      overflow: hidden;
+      border: 1px solid var(--color-border);
+    }
+    .bar-fill {
+      height: 100%;
+      background: var(--color-primary);
+      border-radius: var(--radius-full);
+      transition: width 1s ease-in-out;
+    }
+    .dark-theme .bar-fill {
+      background: var(--color-primary);
+    }
+    .fill-green {
+      background: var(--color-accent);
+    }
+    .quote-bubble {
+      background: var(--color-bg-surface);
+      border-radius: var(--radius-md);
+      padding: var(--space-4);
+      margin-top: var(--space-6);
+      font-style: italic;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--color-border);
+      color: var(--color-text-secondary);
+      display: flex;
+      gap: var(--space-3);
+    }
+
+    /* pillars grid */
+    .pillar-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--space-6);
+      margin: var(--space-8) 0;
+    }
+
+    .pillar-card {
+      text-align: left;
+    }
+    .pillar-icon {
+      font-size: 2.5rem;
+      color: var(--color-accent);
+      margin-bottom: var(--space-4);
+    }
+    .pillar-card h3 {
+      font-size: 1.5rem;
+      margin-bottom: var(--space-2);
+    }
+    .learn-link {
+      color: var(--color-accent);
+      font-weight: 700;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-1);
+      transition: var(--transition-fast);
+    }
+    .learn-link:hover {
+      gap: var(--space-2);
+    }
+
+    /* hubs */
+    .hub-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--space-6);
+      margin: var(--space-8) 0;
+    }
+    .hub-card {
+      background: var(--color-bg-surface);
+      border: 1px solid var(--color-border);
+      box-shadow: var(--shadow-card);
+      transition: var(--transition-spring);
+      border-radius: var(--radius-lg);
+      padding: var(--space-8) var(--space-6);
+    }
+    .hub-image {
+      height: 180px;
+      border-radius: var(--radius-md);
+      margin-bottom: var(--space-4);
+      background-size: cover;
+      background-position: center;
+      display: flex;
+      align-items: flex-end;
+      justify-content: flex-start;
+      padding: var(--space-3);
+      color: #FFFFFF;
+      font-weight: 800;
+      font-size: 1.25rem;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+      border: 1px solid var(--color-border);
+    }
+    .hub-fact {
+      font-size: 0.95rem;
+      color: var(--color-text-secondary);
+      margin: var(--space-2) 0;
+      padding-left: var(--space-2);
+      border-left: 3px solid var(--color-accent);
+      font-weight: 500;
+    }
+
+    /* audience cards */
+    .audience-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--space-6);
+      margin: var(--space-8) 0;
+    }
+    .audience-card {
+      text-align: center;
+    }
+    .audience-icon {
+      font-size: 2.75rem;
+      color: var(--color-primary);
+      margin-bottom: var(--space-4);
+      display: inline-block;
+      transition: var(--transition-spring);
+    }
+    .dark-theme .audience-icon {
+      color: var(--color-accent);
+    }
+    .audience-card:hover .audience-icon {
+      transform: scale(1.1) translateY(-2px);
+    }
+
+    /* flow diagram */
+    .flow-row {
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      background: var(--color-bg-muted);
+      border-radius: var(--radius-xl);
+      padding: var(--space-8) var(--space-6);
+      margin: var(--space-8) 0;
+      border: 1px solid var(--color-border);
+    }
+    .flow-step {
+      text-align: center;
+      flex: 1 1 130px;
+      position: relative;
+    }
+    .flow-step:not(:last-child)::after {
+      content: "→";
+      font-size: 2.2rem;
+      color: var(--color-accent);
+      position: absolute;
+      right: -10px;
+      top: 25%;
+      transform: translateY(-50%);
+      opacity: 0.8;
+    }
+    .flow-icon {
+      font-size: 2.2rem;
+      background: var(--color-bg-surface);
+      width: 72px;
+      height: 72px;
+      border-radius: var(--radius-full);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto var(--space-4);
+      color: var(--color-primary);
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--color-border);
+      transition: var(--transition-bounce);
+    }
+    .dark-theme .flow-icon {
+      color: var(--color-accent);
+    }
+    .flow-step:hover .flow-icon {
+      transform: scale(1.1) rotate(5deg);
+      border-color: var(--color-accent);
+      box-shadow: var(--shadow-card);
+    }
+    .flow-step p {
+      font-weight: 700;
+      color: var(--color-text);
+      font-size: 0.95rem;
+    }
+
+    @media (max-width: 992px) {
+      .two-col, .pillar-grid, .hub-grid, .audience-grid {
+        grid-template-columns: 1fr;
+        gap: var(--space-6);
+      }
+      .flow-row {
+        flex-direction: column;
+        gap: var(--space-8);
+      }
+      .flow-step:not(:last-child)::after {
+        content: "↓";
+        right: 50%;
+        top: auto;
+        bottom: -32px;
+        transform: translateX(50%);
+      }
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--space-4);
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .stats-grid {
+        grid-template-columns: 1fr;
+        gap: var(--space-4);
+      }
+      .pillar-card, .hub-card, .audience-card {
+        padding: var(--space-6) var(--space-4);
+      }
+      .flow-step {
+        padding: var(--space-6) var(--space-4);
+      }
+      .two-col h2 {
+        font-size: 1.6rem;
+      }
+    }
+
+    .small-note {
+      font-size: 0.85rem;
+      color: var(--color-text-secondary);
+      margin-top: var(--space-2);
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation (same as homepage) -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="index.html" class="logo">Mastery <span>Ecosystem</span></a>
+      <button class="hamburger" id="hamburgerBtn" aria-label="Menu"><i class="fas fa-bars"></i></button>
+      <ul class="nav-menu" id="navMenu">
+        <li><a href="Our_model.html">Our Model</a></li>
+        <li><a href="talent_map.html">Talent Map</a></li>
+        <li><a href="investor_impact_dashboard.html">Investor Impact</a></li>
+        <li><a href="manifesto.html">Manifesto</a></li>
+        <li><a href="About_us.html">About</a></li>
+        <li><a href="contact.html">Contact</a></li>
+        <li class="nav-auth-item"><a href="auth.html" class="nav-auth-link">Sign Up</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main>
+    <!-- 1. Page Title & Intro -->
+    <div class="container" style="margin-top: var(--space-12);">
+      <h1>The Mastery Ecosystem</h1>
+      <p class="section-subhead" style="font-size: 1.8rem; font-weight: 300; color: var(--deep-blue);">A radical new approach to education, employment, and industrialization in Malawi.</p>
+      <p style="font-size: 1.2rem; max-width: 800px;">We replace overcrowded curricula with deep mastery, and replace degrees with demonstrable skill.</p>
+    </div>
+
+    <!-- 2. The Problem (data-driven) -->
+    <div class="container section">
+      <div class="two-col">
+        <div>
+          <h2>The Broken Promise</h2>
+          <p style="font-size: 1.2rem; margin-bottom: var(--space-6);">Every year, over 300,000 young Malawians enter the job market. Yet 80% lack the practical skills employers demand. They leave universities with certificates but without confidence—trained for jobs that don’t exist, while industries cry out for talent they cannot find.</p>
+          <div class="small-note">Source: World Bank/ILO (estimates)</div>
+        </div>
+        <div class="stat-visual">
+          <div class="stat-bar">
+            <span class="bar-label">Degree holders</span>
+            <div class="bar-bg"><div class="bar-fill" style="width: 85%;"></div></div>
+            <span>85%</span>
+          </div>
+          <div class="stat-bar">
+            <span class="bar-label">Job‑ready skills</span>
+            <div class="bar-bg"><div class="bar-fill fill-green" style="width: 20%;"></div></div>
+            <span>20%</span>
+          </div>
+          <div class="quote-bubble">
+            <i class="fas fa-quote-left" style="color: var(--vibrant-green); opacity: 0.6; margin-right: var(--space-2);"></i>
+            “We need people who can fix a solar panel, not just recite theory.” – Managing Director, Solar Malawi
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. Four Pillars -->
+    <div class="container section">
+      <h2>Our Solution: A Four‑Pillared Approach</h2>
+      <p class="section-subhead">We don’t wait for reform. We build the alternative.</p>
+      <div class="pillar-grid">
+        <!-- Pillar 1 -->
+        <div class="pillar-card">
+          <div class="pillar-icon"><i class="fas fa-binoculars"></i></div>
+          <h3>1. Talent Safaris</h3>
+          <p>We go to where the talent is—partnering with community radio stations, churches, and district commissioners. Through physical ‘Skill Discovery Days’ in trading centers, we find gifted youth who may never have accessed the internet.</p>
+          <a href="#" class="learn-link">Learn more <i class="fas fa-arrow-right"></i></a>
+        </div>
+        <!-- Pillar 2 -->
+        <div class="pillar-card">
+          <div class="pillar-icon"><i class="fas fa-rocket"></i></div>
+          <h3>2. Mastery Sprints</h3>
+          <p>Intensive 6‑ to 12‑week programs focused on one high‑demand skill—solar installation, mobile money APIs, commercial poultry farming, AI data labeling. Each sprint is co‑designed with an industry partner who provides real‑world projects.</p>
+          <a href="#" class="learn-link">Learn more <i class="fas fa-arrow-right"></i></a>
+        </div>
+        <!-- Pillar 3 -->
+        <div class="pillar-card">
+          <div class="pillar-icon"><i class="fas fa-tag"></i></div>
+          <h3>3. Mastery Badges</h3>
+          <p>Graduates receive digital badges endorsed by partner companies. These badges prove what you can do—no degree required. Employers trust them because they built the curriculum.</p>
+          <a href="#" class="learn-link">Learn more <i class="fas fa-arrow-right"></i></a>
+        </div>
+        <!-- Pillar 4 -->
+        <div class="pillar-card">
+          <div class="pillar-icon"><i class="fas fa-bridge"></i></div>
+          <h3>4. Industry Connect</h3>
+          <p>We connect badge‑holders directly to companies for jobs, to global freelancing platforms, or to investors for their own startups. We turn trainees into earners.</p>
+          <a href="#" class="learn-link">Learn more <i class="fas fa-arrow-right"></i></a>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. The Hubs -->
+    <div class="container section">
+      <h2>Where It Happens: Our Hubs</h2>
+      <p style="font-size: 1.2rem; max-width: 800px;">We are establishing physical hubs in Lilongwe, Blantyre, and Mzuzu—spaces equipped with tools, high‑speed internet, and mentorship. These are not classrooms; they are workshops where youth build, code, fix, and create.</p>
+      <div class="hub-grid">
+        <div class="hub-card">
+          <div class="hub-image" style="background-image: url('https://placehold.co/600x400/0A2F44/white?text=Lilongwe');">Lilongwe</div>
+          <div class="hub-fact"><i class="fas fa-solar-panel" style="margin-right: var(--space-2);"></i> 50 workstations, solar prototyping lab</div>
+        </div>
+        <div class="hub-card">
+          <div class="hub-image" style="background-image: url('https://placehold.co/600x400/0A2F44/white?text=Blantyre');">Blantyre</div>
+          <div class="hub-fact"><i class="fas fa-seedling" style="margin-right: var(--space-2);"></i> Agri‑processing demo unit, packaging line</div>
+        </div>
+        <div class="hub-card">
+          <div class="hub-image" style="background-image: url('https://placehold.co/600x400/0A2F44/white?text=Mzuzu');">Mzuzu</div>
+          <div class="hub-fact"><i class="fas fa-code" style="margin-right: var(--space-2);"></i> Digital media studio, coding dojo</div>
+        </div>
+      </div>
+      <p style="text-align: center; margin-top: var(--space-8); font-size: 1.1rem;">✨ Want to sponsor a hub or set up a satellite in your district? <a href="#" style="color: var(--vibrant-green); font-weight: 600; text-decoration: none;">Contact us <i class="fas fa-arrow-right"></i></a></p>
+    </div>
+
+    <!-- 5. For Different Audiences -->
+    <div class="container section">
+      <h2>How You Fit Into the Ecosystem</h2>
+      <div class="audience-grid">
+        <div class="audience-card">
+          <div class="audience-icon"><i class="fas fa-user-graduate"></i></div>
+          <h3>For Youth</h3>
+          <p>Ready to master one skill and launch your future? Find a Talent Safari near you or apply for an upcoming Sprint.</p>
+          <a href="#" class="btn btn-outline btn-sm">Find a Safari</a>
+        </div>
+        <div class="audience-card">
+          <div class="audience-icon"><i class="fas fa-briefcase"></i></div>
+          <h3>For Companies</h3>
+          <p>Co‑create sprints, hire pre‑vetted talent, or sponsor a hub. Stop filtering by paper—start hiring by skill.</p>
+          <a href="#" class="btn btn-outline btn-sm">Partner With Us</a>
+        </div>
+        <div class="audience-card">
+          <div class="audience-icon"><i class="fas fa-chart-pie"></i></div>
+          <h3>For Investors</h3>
+          <p>Fund a sprint, adopt a hub, or back a graduate’s startup. See exactly where your money goes and the impact it creates.</p>
+          <a href="#" class="btn btn-outline btn-sm">Invest in Impact</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- 6. Visual Summary (Ecosystem Flow) -->
+    <div class="container section">
+      <h2 class="text-center" style="text-align: center;">The Mastery Journey</h2>
+      <div class="flow-row">
+        <div class="flow-step">
+          <div class="flow-icon"><i class="fas fa-compass"></i></div>
+          <p>Discovery</p>
+        </div>
+        <div class="flow-step">
+          <div class="flow-icon"><i class="fas fa-bolt"></i></div>
+          <p>Training</p>
+        </div>
+        <div class="flow-step">
+          <div class="flow-icon"><i class="fas fa-certificate"></i></div>
+          <p>Badging</p>
+        </div>
+        <div class="flow-step">
+          <div class="flow-icon"><i class="fas fa-handshake"></i></div>
+          <p>Connection</p>
+        </div>
+        <div class="flow-step">
+          <div class="flow-icon"><i class="fas fa-industry"></i></div>
+          <p>Industrialize</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer (same as homepage) -->
+  <footer>
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <div class="footer-logo">Mastery <span>Ecosystem</span></div>
+          <p style="color: #cfdfea; margin-bottom: var(--space-6);">From learning to impact – uniting Malawi’s talent with industry.</p>
+          <div class="social-icons">
+            <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+            <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+            <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+            <a href="#" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+          </div>
+        </div>
+        <div class="footer-links">
+          <h4 style="color: white; margin-bottom: var(--space-4);">Explore</h4>
+          <a href="Our_model.html">Our Model</a>
+          <a href="talent_map.html">Talent Map</a>
+          <a href="investor_impact_dashboard.html">Investor Impact</a>
+          <a href="manifesto.html">Manifesto</a>
+        </div>
+        <div class="footer-links">
+          <h4 style="color: white; margin-bottom: var(--space-4);">Connect</h4>
+          <a href="About_us.html">About</a>
+          <a href="contact.html">Contact</a>
+          <a href="#">Blog</a>
+        </div>
+        <div>
+          <h4 style="color: white; margin-bottom: var(--space-4);">Contact</h4>
+          <p><i class="fas fa-envelope" style="margin-right: var(--space-2); color: var(--vibrant-green);"></i> info@masteryecosystem.mw</p>
+          <p><i class="fas fa-map-pin" style="margin-right: var(--space-2); color: var(--vibrant-green);"></i> Area 47, Lilongwe, Malawi</p>
+        </div>
+      </div>
+      <div class="copyright">
+        © 2026 Mastery Ecosystem. All rights reserved.
+      </div>
+    </div>
+  </footer>
+
+  <!-- Hamburger toggle & interactions -->
+  <script>
+    (function() {
+      const hamburger = document.getElementById('hamburgerBtn');
+      const navMenu = document.getElementById('navMenu');
+      if (hamburger && navMenu) {
+        hamburger.addEventListener('click', function(e) {
+          e.stopPropagation();
+          navMenu.classList.toggle('show');
+        });
+        navMenu.querySelectorAll('a').forEach(link => {
+          link.addEventListener('click', () => {
+            if (window.innerWidth <= 768) navMenu.classList.remove('show');
+          });
+        });
+      }
+      window.addEventListener('resize', function() {
+        if (window.innerWidth > 768 && navMenu?.classList.contains('show')) {
+          navMenu.classList.remove('show');
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

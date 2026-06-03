@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mastery Ecosystem · Contact</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet" href="style.css">
+  <script src="theme.js"></script>
+  <style>
+    .contact-hero {
+      padding: var(--space-16) 0 var(--space-10);
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .contact-hero::before {
+      content: '';
+      position: absolute;
+      width: 500px;
+      height: 500px;
+      background: var(--color-accent);
+      filter: blur(180px);
+      opacity: 0.06;
+      top: -40%;
+      left: 50%;
+      transform: translateX(-50%);
+      pointer-events: none;
+    }
+
+    .contact-hero h1 {
+      margin-bottom: var(--space-3);
+      position: relative;
+    }
+
+    .contact-hero p {
+      max-width: 540px;
+      margin: 0 auto;
+      font-size: 1.1rem;
+    }
+
+    .contact-highlight {
+      display: inline-block;
+      background: rgba(var(--color-accent-rgb), 0.08);
+      color: var(--color-accent);
+      font-weight: 600;
+      font-size: 0.85rem;
+      padding: var(--space-1) var(--space-4);
+      border-radius: var(--radius-full);
+      margin-bottom: var(--space-4);
+      letter-spacing: 0.3px;
+      text-transform: uppercase;
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="index.html" class="logo">Mastery <span>Ecosystem</span></a>
+      <button class="hamburger" id="hamburgerBtn" aria-label="Menu"><i class="fas fa-bars"></i></button>
+      <ul class="nav-menu" id="navMenu">
+        <li><a href="Our_model.html">Our Model</a></li>
+        <li><a href="talent_map.html">Talent Map</a></li>
+        <li><a href="investor_impact_dashboard.html">Investor Impact</a></li>
+        <li><a href="manifesto.html">Manifesto</a></li>
+        <li><a href="About_us.html">About</a></li>
+        <li><a href="contact.html">Contact</a></li>
+        <li class="nav-auth-item"><a href="auth.html" class="nav-auth-link">Sign Up</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main>
+    <section class="contact-hero">
+      <div class="container">
+        <span class="contact-highlight"><i class="fas fa-comments" style="margin-right: var(--space-2);"></i> Let&rsquo;s talk</span>
+        <h1>We&rsquo;d love to hear from you.</h1>
+        <p>Whether you&rsquo;re a partner, an investor, a young talent ready to start, or simply curious — drop us a line.</p>
+      </div>
+    </section>
+
+    <section>
+      <div class="container">
+        <div class="contact-grid">
+          <div>
+            <div class="contact-info-list">
+              <div class="contact-card stagger-item">
+                <div class="contact-card-icon"><i class="fas fa-envelope"></i></div>
+                <div class="contact-card-body">
+                  <h4>Email us</h4>
+                  <p>Our team usually responds within 24 hours.</p>
+                  <a href="mailto:info@masteryecosystem.mw">info@masteryecosystem.mw <i class="fas fa-arrow-up-right-from-square" style="font-size: 0.75rem; margin-left: var(--space-1);"></i></a>
+                </div>
+              </div>
+
+              <div class="contact-card stagger-item">
+                <div class="contact-card-icon"><i class="fas fa-map-pin"></i></div>
+                <div class="contact-card-body">
+                  <h4>Visit us</h4>
+                  <p>Area 47, Lilongwe<br>Malawi</p>
+                  <a href="https://maps.google.com/?q=Area+47+Lilongwe+Malawi" target="_blank" rel="noopener">View on map <i class="fas fa-arrow-up-right-from-square" style="font-size: 0.75rem; margin-left: var(--space-1);"></i></a>
+                </div>
+              </div>
+
+              <div class="contact-card stagger-item">
+                <div class="contact-card-icon"><i class="fas fa-clock"></i></div>
+                <div class="contact-card-body">
+                  <h4>Office hours</h4>
+                  <p>Monday – Friday, 8:00 AM – 5:00 PM CAT<br>Weekend visits by appointment</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="contact-social-wrap stagger-item">
+              <h4>Follow our journey</h4>
+              <p style="font-size: 0.9rem; margin-bottom: var(--space-4);">Stay connected with what we&rsquo;re building across Malawi.</p>
+              <div class="social-icons">
+                <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+                <a href="#" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+                <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+              </div>
+            </div>
+          </div>
+
+          <div class="contact-form-wrap stagger-item">
+            <div id="formContent">
+              <h2>Send us a message</h2>
+              <form id="contactForm" novalidate>
+                <div class="form-group">
+                  <label for="formName">Your name</label>
+                  <input type="text" id="formName" class="form-control" placeholder="e.g. Temwa Gondwe" required autocomplete="name">
+                  <div class="form-feedback" id="nameFeedback"></div>
+                </div>
+
+                <div class="form-group">
+                  <label for="formEmail">Email address</label>
+                  <input type="email" id="formEmail" class="form-control" placeholder="you@example.com" required autocomplete="email">
+                  <div class="form-feedback" id="emailFeedback"></div>
+                </div>
+
+                <div class="form-group">
+                  <label for="formSubject">Subject</label>
+                  <select id="formSubject" class="form-control" required>
+                    <option value="" disabled selected>What is this regarding?</option>
+                    <option value="partnership">Partnership inquiry</option>
+                    <option value="investor">Investor interest</option>
+                    <option value="talent">Joining as talent</option>
+                    <option value="media">Media &amp; press</option>
+                    <option value="general">General inquiry</option>
+                  </select>
+                  <div class="form-feedback" id="subjectFeedback"></div>
+                </div>
+
+                <div class="form-group">
+                  <label for="formMessage">Message</label>
+                  <textarea id="formMessage" class="form-control" placeholder="Tell us a bit about yourself, your organisation, and how you&rsquo;d like to connect&hellip;" rows="5" required></textarea>
+                  <div class="form-feedback" id="messageFeedback"></div>
+                </div>
+
+                <div class="form-submit-wrap">
+                  <button type="submit" class="btn btn-primary" id="submitBtn">
+                    <span id="submitText">Send message</span>
+                    <span id="submitSpinner" style="display: none;"><i class="fas fa-circle-notch fa-spin"></i></span>
+                    <i class="fas fa-paper-plane" style="margin-left: var(--space-2);" id="submitIcon"></i>
+                  </button>
+                  <p style="font-size: 0.8rem; color: var(--color-text-secondary); margin: 0;"><i class="fas fa-shield-halved" style="margin-right: var(--space-1);"></i> Your information stays private.</p>
+                </div>
+              </form>
+            </div>
+
+            <div class="form-success-state" id="formSuccess">
+              <div class="form-success-icon"><i class="fas fa-paper-plane"></i></div>
+              <h3>Message sent!</h3>
+              <p>Thank you for reaching out. Our team in Lilongwe will read your message and get back to you within 24 hours.</p>
+              <button class="btn btn-outline" style="margin-top: var(--space-6);" onclick="resetForm()">Send another message</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <div class="footer-logo">Mastery <span>Ecosystem</span></div>
+          <p style="color: #cfdfea; margin-bottom: var(--space-6);">From learning to impact &ndash; uniting Malawi&rsquo;s talent with industry.</p>
+          <div class="social-icons">
+            <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+            <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+            <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+            <a href="#" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+          </div>
+        </div>
+        <div class="footer-links">
+          <h4 style="color: white; margin-bottom: var(--space-4);">Explore</h4>
+          <a href="Our_model.html">Our Model</a>
+          <a href="talent_map.html">Talent Map</a>
+          <a href="investor_impact_dashboard.html">Investor Impact</a>
+          <a href="manifesto.html">Manifesto</a>
+        </div>
+        <div class="footer-links">
+          <h4 style="color: white; margin-bottom: var(--space-4);">Connect</h4>
+          <a href="About_us.html">About</a>
+          <a href="contact.html">Contact</a>
+          <a href="#">Blog</a>
+        </div>
+        <div>
+          <h4 style="color: white; margin-bottom: var(--space-4);">Contact</h4>
+          <p><i class="fas fa-envelope" style="margin-right: var(--space-2); color: var(--vibrant-green);"></i> info@masteryecosystem.mw</p>
+          <p><i class="fas fa-map-pin" style="margin-right: var(--space-2); color: var(--vibrant-green);"></i> Area 47, Lilongwe, Malawi</p>
+        </div>
+      </div>
+      <div class="copyright">
+        &copy; 2026 Mastery Ecosystem. All rights reserved.
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    (function() {
+      var hamburger = document.getElementById('hamburgerBtn');
+      var navMenu = document.getElementById('navMenu');
+      if (hamburger && navMenu) {
+        hamburger.addEventListener('click', function(e) {
+          e.stopPropagation();
+          navMenu.classList.toggle('show');
+        });
+        navMenu.querySelectorAll('a').forEach(function(link) {
+          link.addEventListener('click', function() {
+            if (window.innerWidth <= 768) navMenu.classList.remove('show');
+          });
+        });
+      }
+
+      window.addEventListener('resize', function() {
+        if (window.innerWidth > 768 && navMenu.classList.contains('show')) {
+          navMenu.classList.remove('show');
+        }
+      });
+    })();
+
+    var fields = {
+      name: document.getElementById('formName'),
+      email: document.getElementById('formEmail'),
+      subject: document.getElementById('formSubject'),
+      message: document.getElementById('formMessage')
+    };
+
+    var feedback = {
+      name: document.getElementById('nameFeedback'),
+      email: document.getElementById('emailFeedback'),
+      subject: document.getElementById('subjectFeedback'),
+      message: document.getElementById('messageFeedback')
+    };
+
+    function validateField(field) {
+      var val = field.value.trim();
+      var id = field.id.replace('form', '').toLowerCase();
+      var fb = feedback[id];
+      var isValid = true;
+      var msg = '';
+
+      if (id === 'name') {
+        isValid = val.length >= 2;
+        msg = isValid ? 'Looks good' : 'Please enter your full name';
+      } else if (id === 'email') {
+        isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val);
+        msg = isValid ? 'Valid email' : 'Please enter a valid email address';
+      } else if (id === 'subject') {
+        isValid = val !== '';
+        msg = isValid ? 'Thanks' : 'Please select a subject';
+      } else if (id === 'message') {
+        isValid = val.length >= 10;
+        msg = isValid ? 'Got it' : 'Please write at least 10 characters';
+      }
+
+      if (val === '') {
+        field.classList.remove('is-valid', 'is-invalid');
+        fb.classList.remove('show', 'error', 'success');
+        return true;
+      }
+
+      field.classList.remove('is-valid', 'is-invalid');
+      fb.classList.remove('show', 'error', 'success');
+
+      if (isValid) {
+        field.classList.add('is-valid');
+        fb.className = 'form-feedback show success';
+        fb.innerHTML = '<i class="fas fa-check-circle"></i> ' + msg;
+      } else {
+        field.classList.add('is-invalid');
+        fb.className = 'form-feedback show error';
+        fb.innerHTML = '<i class="fas fa-exclamation-circle"></i> ' + msg;
+      }
+
+      return isValid;
+    }
+
+    fields.name.addEventListener('blur', function() { validateField(fields.name); });
+    fields.name.addEventListener('input', function() { if (this.value.trim()) validateField(this); });
+    fields.email.addEventListener('blur', function() { validateField(fields.email); });
+    fields.email.addEventListener('input', function() { if (this.value.trim()) validateField(this); });
+    fields.subject.addEventListener('change', function() { validateField(fields.subject); });
+    fields.message.addEventListener('blur', function() { validateField(fields.message); });
+    fields.message.addEventListener('input', function() { if (this.value.trim().length >= 5) validateField(this); });
+
+    var form = document.getElementById('contactForm');
+    var submitBtn = document.getElementById('submitBtn');
+    var submitText = document.getElementById('submitText');
+    var submitSpinner = document.getElementById('submitSpinner');
+    var submitIcon = document.getElementById('submitIcon');
+    var formContent = document.getElementById('formContent');
+    var formSuccess = document.getElementById('formSuccess');
+
+    function resetForm() {
+      form.reset();
+      Object.keys(fields).forEach(function(k) {
+        fields[k].classList.remove('is-valid', 'is-invalid');
+        feedback[k].classList.remove('show', 'error', 'success');
+      });
+      formContent.style.display = 'block';
+      formSuccess.classList.remove('show');
+    }
+
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      var allValid = true;
+      Object.keys(fields).forEach(function(k) {
+        if (!validateField(fields[k])) allValid = false;
+      });
+
+      if (!allValid) {
+        var firstInvalid = form.querySelector('.is-invalid');
+        if (firstInvalid) firstInvalid.focus();
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitText.textContent = 'Sending';
+      submitSpinner.style.display = 'inline';
+      submitIcon.style.display = 'none';
+
+      var btnText = submitBtn.querySelector('.btn-text');
+      setTimeout(function() {
+        submitBtn.disabled = false;
+        submitText.textContent = 'Send message';
+        submitSpinner.style.display = 'none';
+        submitIcon.style.display = 'inline';
+
+        formContent.style.display = 'none';
+        formSuccess.classList.add('show');
+      }, 1800);
+    });
+  </script>
+</body>
+</html>

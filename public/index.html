@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Malawi Talent Map</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <style>
+    body, html { margin: 0; padding: 0; height: 100%; font-family: 'Inter', system-ui, sans-serif; }
+    #map { height: 100%; width: 100%; }
+    .register-button {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 1000;
+      background: #1B7C4B;
+      color: white;
+      padding: 12px 20px;
+      border-radius: 30px;
+      text-decoration: none;
+      font-family: 'Inter', system-ui, sans-serif;
+      font-weight: 600;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+      transition: background 0.2s;
+    }
+    .register-button:hover { background: #125C37; }
+    .legend {
+      position: fixed;
+      bottom: 80px;
+      left: 20px;
+      z-index: 1000;
+      background: white;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      box-shadow: 0 1px 5px rgba(0,0,0,0.15);
+      font-family: 'Inter', system-ui, sans-serif;
+    }
+    .legend-item { display: flex; align-items: center; gap: 6px; margin: 2px 0; }
+    .legend-color { width: 16px; height: 16px; border-radius: 3px; }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+  <a href="/register.html" class="register-button">+ Register Your Location</a>
+  <div class="legend">
+    <div class="legend-item"><div class="legend-color" style="background: #a6cee3; border: 1px solid #2b8cbe;"></div> District boundary</div>
+    <div class="legend-item"><div class="legend-color" style="background: #e74c3c; width: 10px; height: 10px; border-radius: 50%;"></div> Registered talent</div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    const map = L.map('map').setView([-13.5, 34], 7);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> contributors',
+      maxZoom: 19
+    }).addTo(map);
+
+    // Load district boundaries
+    fetch('/malawi_districts.geojson')
+      .then(response => response.json())
+      .then(data => {
+        L.geoJSON(data, {
+          style: {
+            color: '#2b8cbe',
+            weight: 2,
+            fillColor: '#a6cee3',
+            fillOpacity: 0.2
+          },
+          onEachFeature: (feature, layer) => {
+            layer.bindTooltip(feature.properties.shapeName || 'District', {
+              sticky: true,
+              direction: 'top'
+            });
+            layer.on('click', () => {
+              map.fitBounds(layer.getBounds(), { padding: [40, 40] });
+            });
+          }
+        }).addTo(map);
+      })
+      .catch(err => console.error('Failed to load district boundaries:', err));
+
+    // Load user markers
+    async function loadUsers() {
+      try {
+        const response = await fetch('/api/users');
+        const users = await response.json();
+        users.forEach(user => {
+          const marker = L.marker([user.latitude, user.longitude]).addTo(map);
+          const popupHtml = `
+            <strong>${escapeHtml(user.name)}</strong><br>
+            Phone: ${escapeHtml(user.phone)}<br>
+            Email: ${escapeHtml(user.email)}<br>
+            <a href="/profile/${user.id}" target="_blank">View full profile</a>
+          `;
+          marker.bindPopup(popupHtml);
+        });
+      } catch (err) {
+        console.error('Error loading users:', err);
+      }
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return str.replace(/[&<>]/g, function(m) {
+        if (m === '&') return '&amp;';
+        if (m === '<') return '&lt;';
+        if (m === '>') return '&gt;';
+        return m;
+      });
+    }
+
+    loadUsers();
+  </script>
+</body>
+</html>

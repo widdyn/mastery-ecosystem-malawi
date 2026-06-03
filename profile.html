@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mastery Ecosystem · My Profile</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet" href="style.css">
+  <script src="theme.js"></script>
+  <style>
+    .profile-page-wrap {
+      padding: var(--space-8) 0 var(--space-16);
+    }
+
+    .profile-loading {
+      text-align: center;
+      padding: var(--space-20);
+      color: var(--color-text-secondary);
+    }
+
+    .profile-loading i {
+      font-size: 2.5rem;
+      color: var(--color-accent);
+      margin-bottom: var(--space-4);
+    }
+
+    .profile-hidden {
+      display: none;
+    }
+
+    .profile-signout-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: var(--space-2) var(--space-5);
+      border: 2px solid var(--color-border);
+      background: transparent;
+      color: var(--color-text-secondary);
+      font-weight: 600;
+      font-size: 0.85rem;
+      border-radius: var(--radius-full);
+      cursor: pointer;
+      transition: var(--transition-bounce);
+      font-family: var(--font-sans);
+    }
+
+    .profile-signout-btn:hover {
+      border-color: #DC2626;
+      color: #DC2626;
+      transform: translateY(-1px);
+    }
+
+    /* Edit modal */
+    .edit-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(8px);
+      z-index: 2000;
+      align-items: center;
+      justify-content: center;
+      padding: var(--space-4);
+    }
+
+    .edit-overlay.show {
+      display: flex;
+    }
+
+    .edit-modal {
+      background: var(--color-bg-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-xl);
+      padding: var(--space-8);
+      width: 100%;
+      max-width: 560px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: var(--shadow-lg);
+      animation: fadeScaleIn 300ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+
+    .edit-modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: var(--space-6);
+    }
+
+    .edit-modal-header h2 {
+      margin-bottom: 0;
+      font-size: 1.5rem;
+    }
+
+    .edit-close-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: var(--radius-full);
+      border: 1px solid var(--color-border);
+      background: transparent;
+      color: var(--color-text-secondary);
+      font-size: 1.1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition-fast);
+    }
+
+    .edit-close-btn:hover {
+      border-color: var(--color-accent);
+      color: var(--color-accent);
+    }
+
+    .skills-input-wrap {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-2);
+      padding: var(--space-3);
+      border: 2px solid var(--color-border);
+      border-radius: var(--radius-md);
+      background: var(--color-bg-base);
+      min-height: 48px;
+      cursor: text;
+      transition: var(--transition-smooth);
+    }
+
+    .skills-input-wrap:focus-within {
+      border-color: var(--color-accent);
+      box-shadow: 0 0 0 4px var(--color-border-glow);
+    }
+
+    .skill-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-1);
+      background: rgba(var(--color-accent-rgb), 0.1);
+      color: var(--color-accent);
+      padding: var(--space-1) var(--space-3);
+      border-radius: var(--radius-full);
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    .skill-chip .remove-skill {
+      cursor: pointer;
+      font-size: 0.8rem;
+      opacity: 0.7;
+      transition: var(--transition-fast);
+    }
+
+    .skill-chip .remove-skill:hover {
+      opacity: 1;
+      color: #DC2626;
+    }
+
+    .skills-input {
+      border: none;
+      outline: none;
+      background: transparent;
+      font-family: var(--font-sans);
+      font-size: 0.9rem;
+      color: var(--color-text);
+      flex: 1;
+      min-width: 80px;
+      padding: var(--space-1) 0;
+    }
+
+    .edit-actions {
+      display: flex;
+      gap: var(--space-3);
+      margin-top: var(--space-6);
+      justify-content: flex-end;
+    }
+
+    .edit-save-btn {
+      min-width: 140px;
+    }
+
+    @media (max-width: 480px) {
+      .edit-modal {
+        padding: var(--space-6);
+        border-radius: var(--radius-lg);
+      }
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="index.html" class="logo">Mastery <span>Ecosystem</span></a>
+      <button class="hamburger" id="hamburgerBtn" aria-label="Menu"><i class="fas fa-bars"></i></button>
+      <ul class="nav-menu" id="navMenu">
+        <li><a href="Our_model.html">Our Model</a></li>
+        <li><a href="talent_map.html">Talent Map</a></li>
+        <li><a href="investor_impact_dashboard.html">Investor Impact</a></li>
+        <li><a href="manifesto.html">Manifesto</a></li>
+        <li><a href="About_us.html">About</a></li>
+        <li><a href="contact.html">Contact</a></li>
+        <li class="nav-auth-item"><a href="auth.html" class="nav-auth-link">Sign Up</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main class="profile-page-wrap" id="profilePage">
+    <div class="profile-loading" id="profileLoading">
+      <i class="fas fa-circle-notch fa-spin"></i>
+      <p>Loading your profile...</p>
+    </div>
+
+    <div class="profile-hidden" id="profileContent">
+      <div class="container">
+        <div class="profile-cover"></div>
+
+        <div class="profile-header-card">
+          <div class="profile-header-inner">
+            <div class="profile-avatar-wrap">
+              <div class="profile-avatar" id="profileAvatar"></div>
+            </div>
+            <div class="profile-info">
+              <h1 id="profileName"></h1>
+              <div class="profile-tagline" id="profileTagline"></div>
+              <div class="profile-meta" id="profileMeta"></div>
+              <div class="profile-actions">
+                <button class="edit-profile-btn" id="editProfileBtn"><i class="fas fa-pen"></i> Edit profile</button>
+                <button class="profile-signout-btn" id="signOutBtn"><i class="fas fa-sign-out-alt"></i> Sign out</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="profile-content">
+          <div class="profile-section" id="bioSection">
+            <div class="profile-section-header">
+              <h3><i class="fas fa-quote-left"></i> About</h3>
+            </div>
+            <p class="profile-bio empty" id="profileBio">No bio yet. Tell us a bit about yourself.</p>
+          </div>
+
+          <div class="profile-section" id="skillsSection">
+            <div class="profile-section-header">
+              <h3><i class="fas fa-medal"></i> Skills</h3>
+            </div>
+            <div id="profileSkills"><span style="color: var(--color-text-secondary); font-size: 0.9rem; font-style: italic;">No skills added yet.</span></div>
+          </div>
+
+          <div class="profile-section full-width" id="statsSection">
+            <div class="profile-section-header">
+              <h3><i class="fas fa-chart-simple"></i> Your Impact</h3>
+            </div>
+            <div class="profile-stats">
+              <div class="stat-card">
+                <div class="stat-number">0</div>
+                <div class="stat-label">Skills mastered</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-number">0</div>
+                <div class="stat-label">Badges earned</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-number" id="memberSinceStat">&mdash;</div>
+                <div class="stat-label">Member since</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="profile-section full-width" id="badgesSection">
+            <div class="profile-section-header">
+              <h3><i class="fas fa-certificate"></i> Badges</h3>
+            </div>
+            <div id="profileBadges"><span style="color: var(--color-text-secondary); font-size: 0.9rem; font-style: italic;">Complete training to earn your first badge.</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Edit Profile Modal -->
+    <div class="edit-overlay" id="editOverlay">
+      <div class="edit-modal">
+        <div class="edit-modal-header">
+          <h2>Edit profile</h2>
+          <button class="edit-close-btn" id="editCloseBtn"><i class="fas fa-xmark"></i></button>
+        </div>
+        <form id="editForm">
+          <div class="form-group">
+            <label>Full name</label>
+            <input type="text" class="form-control" id="editName" required>
+          </div>
+          <div class="form-group">
+            <label>Phone</label>
+            <input type="tel" class="form-control" id="editPhone">
+          </div>
+          <div class="form-group">
+            <label>District</label>
+            <select class="form-control" id="editDistrict">
+              <option value="">Select your district</option>
+              <option value="Balaka">Balaka</option>
+              <option value="Blantyre">Blantyre</option>
+              <option value="Chikwawa">Chikwawa</option>
+              <option value="Chiradzulu">Chiradzulu</option>
+              <option value="Chitipa">Chitipa</option>
+              <option value="Dedza">Dedza</option>
+              <option value="Dowa">Dowa</option>
+              <option value="Karonga">Karonga</option>
+              <option value="Kasungu">Kasungu</option>
+              <option value="Likoma">Likoma</option>
+              <option value="Lilongwe">Lilongwe</option>
+              <option value="Machinga">Machinga</option>
+              <option value="Mangochi">Mangochi</option>
+              <option value="Mchinji">Mchinji</option>
+              <option value="Mulanje">Mulanje</option>
+              <option value="Mwanza">Mwanza</option>
+              <option value="Mzimba">Mzimba</option>
+              <option value="Neno">Neno</option>
+              <option value="Nkhata Bay">Nkhata Bay</option>
+              <option value="Nkhotakota">Nkhotakota</option>
+              <option value="Nsanje">Nsanje</option>
+              <option value="Ntcheu">Ntcheu</option>
+              <option value="Ntchisi">Ntchisi</option>
+              <option value="Phalombe">Phalombe</option>
+              <option value="Rumphi">Rumphi</option>
+              <option value="Salima">Salima</option>
+              <option value="Thyolo">Thyolo</option>
+              <option value="Zomba">Zomba</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Bio</label>
+            <textarea class="form-control" id="editBio" rows="3" placeholder="Tell us about yourself, your passion, and what you&rsquo;re building."></textarea>
+          </div>
+          <div class="form-group">
+            <label>Skills</label>
+            <div class="skills-input-wrap" id="skillsWrap">
+              <div id="skillsChips"></div>
+              <input type="text" class="skills-input" id="editSkillsInput" placeholder="Type a skill and press Enter" autocomplete="off">
+            </div>
+            <p style="font-size: 0.8rem; color: var(--color-text-secondary); margin-top: var(--space-1);">Press Enter or comma to add a skill</p>
+          </div>
+          <div class="edit-actions">
+            <button type="button" class="btn btn-outline" id="editCancelBtn">Cancel</button>
+            <button type="submit" class="btn btn-primary edit-save-btn" id="editSaveBtn">
+              <span id="editSaveText">Save changes</span>
+              <span id="editSaveSpinner" style="display: none;"><i class="fas fa-circle-notch fa-spin"></i></span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <div class="footer-logo">Mastery <span>Ecosystem</span></div>
+          <p style="color: #cfdfea; margin-bottom: var(--space-6);">From learning to impact &ndash; uniting Malawi&rsquo;s talent with industry.</p>
+          <div class="social-icons">
+            <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+            <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+            <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+            <a href="#" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+          </div>
+        </div>
+        <div class="footer-links">
+          <h4 style="color: white; margin-bottom: var(--space-4);">Explore</h4>
+          <a href="Our_model.html">Our Model</a>
+          <a href="talent_map.html">Talent Map</a>
+          <a href="investor_impact_dashboard.html">Investor Impact</a>
+          <a href="manifesto.html">Manifesto</a>
+        </div>
+        <div class="footer-links">
+          <h4 style="color: white; margin-bottom: var(--space-4);">Connect</h4>
+          <a href="About_us.html">About</a>
+          <a href="contact.html">Contact</a>
+          <a href="#">Blog</a>
+        </div>
+        <div>
+          <h4 style="color: white; margin-bottom: var(--space-4);">Contact</h4>
+          <p><i class="fas fa-envelope" style="margin-right: var(--space-2); color: var(--vibrant-green);"></i> info@masteryecosystem.mw</p>
+          <p><i class="fas fa-map-pin" style="margin-right: var(--space-2); color: var(--vibrant-green);"></i> Area 47, Lilongwe, Malawi</p>
+        </div>
+      </div>
+      <div class="copyright">
+        &copy; 2026 Mastery Ecosystem. All rights reserved.
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    (function() {
+      var hamburger = document.getElementById('hamburgerBtn');
+      var navMenu = document.getElementById('navMenu');
+      if (hamburger && navMenu) {
+        hamburger.addEventListener('click', function(e) {
+          e.stopPropagation();
+          navMenu.classList.toggle('show');
+        });
+        navMenu.querySelectorAll('a').forEach(function(link) {
+          link.addEventListener('click', function() {
+            if (window.innerWidth <= 768) navMenu.classList.remove('show');
+          });
+        });
+      }
+
+      window.addEventListener('resize', function() {
+        if (window.innerWidth > 768 && navMenu.classList.contains('show')) {
+          navMenu.classList.remove('show');
+        }
+      });
+    })();
+
+    var currentUser = null;
+
+    function getInitials(name) {
+      return name.split(' ').map(function(n) { return n[0]; }).join('').toUpperCase().slice(0, 2);
+    }
+
+    function formatDate(dateStr) {
+      if (!dateStr) return '&mdash;';
+      var d = new Date(dateStr);
+      if (isNaN(d.getTime())) return dateStr.split('T')[0] || '&mdash;';
+      var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      return months[d.getMonth()] + ' ' + d.getFullYear();
+    }
+
+    function loadProfile(user) {
+      currentUser = user;
+      document.getElementById('profileLoading').style.display = 'none';
+      document.getElementById('profileContent').classList.remove('profile-hidden');
+
+      var avatar = document.getElementById('profileAvatar');
+      avatar.textContent = getInitials(user.full_name);
+
+      document.getElementById('profileName').textContent = user.full_name;
+
+      var tagline = document.getElementById('profileTagline');
+      var tagParts = [];
+      if (user.district) tagParts.push('<i class="fas fa-map-pin"></i> ' + user.district);
+      tagParts.push('<i class="fas fa-envelope"></i> ' + user.email);
+      tagline.innerHTML = tagParts.join(' &middot; ');
+
+      var meta = document.getElementById('profileMeta');
+      var metaParts = [];
+      if (user.phone) metaParts.push('<span class="profile-meta-item"><i class="fas fa-phone"></i> ' + user.phone + '</span>');
+      metaParts.push('<span class="profile-meta-item"><i class="fas fa-calendar"></i> Joined ' + formatDate(user.created_at) + '</span>');
+      meta.innerHTML = metaParts.join('');
+
+      var bio = document.getElementById('profileBio');
+      if (user.bio) {
+        bio.textContent = user.bio;
+        bio.classList.remove('empty');
+      } else {
+        bio.textContent = 'No bio yet. Tell us a bit about yourself.';
+        bio.classList.add('empty');
+      }
+
+      var skillsContainer = document.getElementById('profileSkills');
+      if (user.skills && user.skills.length > 0) {
+        skillsContainer.innerHTML = user.skills.map(function(s) { return '<span class="skill-tag"><i class="fas fa-check"></i> ' + s + '</span>'; }).join('');
+      } else {
+        skillsContainer.innerHTML = '<span style="color: var(--color-text-secondary); font-size: 0.9rem; font-style: italic;">No skills added yet.</span>';
+      }
+
+      var badgesContainer = document.getElementById('profileBadges');
+      if (user.badges && user.badges.length > 0) {
+        badgesContainer.innerHTML = user.badges.map(function(b) { return '<span class="badge-item"><i class="fas fa-certificate"></i> ' + b + '</span>'; }).join('');
+      } else {
+        badgesContainer.innerHTML = '<span style="color: var(--color-text-secondary); font-size: 0.9rem; font-style: italic;">Complete training to earn your first badge.</span>';
+      }
+
+      var skillCount = document.querySelector('#statsSection .stat-card:nth-child(1) .stat-number');
+      var badgeCount = document.querySelector('#statsSection .stat-card:nth-child(2) .stat-number');
+      skillCount.textContent = (user.skills && user.skills.length) || 0;
+      badgeCount.textContent = (user.badges && user.badges.length) || 0;
+      document.getElementById('memberSinceStat').textContent = formatDate(user.created_at);
+    }
+
+    function fetchProfile() {
+      var stored = localStorage.getItem('auth_user');
+      var email = null;
+
+      if (stored) {
+        try {
+          var parsed = JSON.parse(stored);
+          email = parsed.email;
+        } catch (e) {}
+      }
+
+      if (!email) {
+        document.getElementById('profileLoading').innerHTML = '<i class="fas fa-user-slash" style="font-size: 3rem;"></i><p style="margin-top: var(--space-4);">You are not signed in.</p><a href="auth.html" class="btn btn-primary" style="margin-top: var(--space-4);">Sign In</a>';
+        return;
+      }
+
+      fetch('/api/auth/profile', { headers: { 'x-user-email': email } })
+        .then(function(r) { return r.json(); })
+        .then(function(res) {
+          if (res.user) {
+            localStorage.setItem('auth_user', JSON.stringify(res.user));
+            loadProfile(res.user);
+          } else {
+            localStorage.removeItem('auth_user');
+            localStorage.removeItem('auth_token');
+            document.getElementById('profileLoading').innerHTML = '<i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: var(--color-secondary);"></i><p style="margin-top: var(--space-4);">Could not load profile. Please sign in again.</p><a href="auth.html" class="btn btn-primary" style="margin-top: var(--space-4);">Sign In</a>';
+          }
+        })
+        .catch(function() {
+          if (stored) {
+            try { loadProfile(JSON.parse(stored)); } catch (e) {}
+          } else {
+            document.getElementById('profileLoading').innerHTML = '<i class="fas fa-wifi-slash" style="font-size: 3rem;"></i><p style="margin-top: var(--space-4);">Connection error. Please try again.</p>';
+          }
+        });
+    }
+
+    fetchProfile();
+
+    /* Sign Out */
+    document.getElementById('signOutBtn').addEventListener('click', function() {
+      localStorage.removeItem('auth_user');
+      localStorage.removeItem('auth_token');
+      window.location.href = 'index.html';
+    });
+
+    /* Edit Modal */
+    var editOverlay = document.getElementById('editOverlay');
+    var editBtn = document.getElementById('editProfileBtn');
+    var editClose = document.getElementById('editCloseBtn');
+    var editCancel = document.getElementById('editCancelBtn');
+
+    editBtn.addEventListener('click', function() {
+      if (!currentUser) return;
+      document.getElementById('editName').value = currentUser.full_name || '';
+      document.getElementById('editPhone').value = currentUser.phone || '';
+      document.getElementById('editDistrict').value = currentUser.district || '';
+      document.getElementById('editBio').value = currentUser.bio || '';
+      renderEditSkills(currentUser.skills || []);
+      editOverlay.classList.add('show');
+    });
+
+    function closeEdit() { editOverlay.classList.remove('show'); }
+    editClose.addEventListener('click', closeEdit);
+    editCancel.addEventListener('click', closeEdit);
+    editOverlay.addEventListener('click', function(e) { if (e.target === this) closeEdit(); });
+
+    /* Skills editing */
+    var editSkills = [];
+    var skillsWrap = document.getElementById('skillsWrap');
+    var skillsChips = document.getElementById('skillsChips');
+    var skillsInput = document.getElementById('editSkillsInput');
+
+    function renderEditSkills(skills) {
+      editSkills = skills.slice();
+      if (skills.length === 0) {
+        skillsChips.innerHTML = '';
+      } else {
+        skillsChips.innerHTML = skills.map(function(s, i) {
+          return '<span class="skill-chip">' + s + ' <span class="remove-skill" data-index="' + i + '"><i class="fas fa-xmark"></i></span></span>';
+        }).join('');
+        skillsChips.querySelectorAll('.remove-skill').forEach(function(el) {
+          el.addEventListener('click', function() {
+            var idx = parseInt(this.dataset.index);
+            editSkills.splice(idx, 1);
+            renderEditSkills(editSkills);
+          });
+        });
+      }
+    }
+
+    function addSkill(val) {
+      var trimmed = val.trim();
+      if (trimmed && editSkills.indexOf(trimmed) === -1) {
+        editSkills.push(trimmed);
+        renderEditSkills(editSkills);
+      }
+      skillsInput.value = '';
+    }
+
+    skillsInput.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' || e.key === ',') {
+        e.preventDefault();
+        addSkill(this.value);
+      }
+    });
+
+    skillsInput.addEventListener('blur', function() {
+      if (this.value.trim()) addSkill(this.value);
+    });
+
+    /* Save edit */
+    document.getElementById('editForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      var updatedName = document.getElementById('editName').value.trim();
+      if (!updatedName) return;
+
+      var btn = document.getElementById('editSaveBtn');
+      var text = document.getElementById('editSaveText');
+      var spinner = document.getElementById('editSaveSpinner');
+      btn.disabled = true;
+      text.textContent = 'Saving';
+      spinner.style.display = 'inline';
+
+      var stored = localStorage.getItem('auth_user');
+      var email = stored ? JSON.parse(stored).email : null;
+
+      if (!email) {
+        closeEdit();
+        btn.disabled = false;
+        text.textContent = 'Save changes';
+        spinner.style.display = 'none';
+        return;
+      }
+
+      var payload = {
+        full_name: updatedName,
+        phone: document.getElementById('editPhone').value.trim(),
+        district: document.getElementById('editDistrict').value,
+        bio: document.getElementById('editBio').value.trim(),
+        skills: editSkills
+      };
+
+      fetch('/api/auth/profile', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'x-user-email': email },
+        body: JSON.stringify(payload)
+      })
+      .then(function(r) { return r.json(); })
+      .then(function(res) {
+        if (res.message) {
+          currentUser.full_name = payload.full_name;
+          currentUser.phone = payload.phone;
+          currentUser.district = payload.district;
+          currentUser.bio = payload.bio;
+          currentUser.skills = payload.skills;
+          localStorage.setItem('auth_user', JSON.stringify(currentUser));
+          loadProfile(currentUser);
+        }
+        closeEdit();
+        btn.disabled = false;
+        text.textContent = 'Save changes';
+        spinner.style.display = 'none';
+      })
+      .catch(function() {
+        closeEdit();
+        btn.disabled = false;
+        text.textContent = 'Save changes';
+        spinner.style.display = 'none';
+      });
+    });
+  </script>
+</body>
+</html>

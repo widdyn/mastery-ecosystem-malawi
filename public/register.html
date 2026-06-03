@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register - Malawi Talent Map</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: 'Inter', system-ui, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: #f9fafb; }
+    h1 { font-size: 1.8rem; color: #0A2F44; margin-bottom: 4px; }
+    .sub { color: #475569; margin-bottom: 20px; }
+    #map { height: 400px; width: 100%; margin-bottom: 20px; border-radius: 12px; }
+    label { font-weight: 600; display: block; margin-top: 12px; margin-bottom: 4px; font-size: 0.9rem; color: #0A2F44; }
+    input, button { display: block; width: 100%; padding: 12px 16px; font-size: 1rem; border: 1px solid #d1d5db; border-radius: 10px; font-family: inherit; }
+    input:focus { outline: none; border-color: #1B7C4B; box-shadow: 0 0 0 3px rgba(27,124,75,0.12); }
+    button { background: #1B7C4B; color: white; border: none; font-weight: 600; cursor: pointer; margin-top: 16px; transition: background 0.2s; }
+    button:hover { background: #125C37; }
+    .privacy-note { font-size: 0.8rem; color: #64748b; margin-top: 10px; text-align: center; }
+    .error { color: #dc2626; margin-top: 8px; font-size: 0.9rem; }
+    .back-link { display: block; text-align: center; margin-top: 16px; color: #1B7C4B; text-decoration: none; font-size: 0.9rem; font-weight: 600; }
+    .back-link:hover { text-decoration: underline; }
+    .coords-display { font-size: 0.85rem; color: #64748b; margin-top: 4px; }
+  </style>
+</head>
+<body>
+  <h1>Register on the Talent Map</h1>
+  <p class="sub">Click on the map to drop a pin at your exact location inside Malawi, then fill in your details.</p>
+
+  <div id="map"></div>
+
+  <form id="registerForm">
+    <label for="name">Full name</label>
+    <input type="text" id="name" placeholder="e.g. Chimwemwe Banda" required>
+
+    <label for="email">Email address</label>
+    <input type="email" id="email" placeholder="you@example.com" required>
+
+    <label for="phone">Phone number</label>
+    <input type="tel" id="phone" placeholder="+265 99 123 4567" required>
+
+    <input type="hidden" id="lat">
+    <input type="hidden" id="lng">
+
+    <div class="coords-display" id="coordsDisplay">No location selected yet</div>
+
+    <button type="submit">Register</button>
+    <div id="formError" class="error"></div>
+  </form>
+
+  <p class="privacy-note">Your name, phone, and email will be publicly visible on the map.</p>
+
+  <a href="/" class="back-link">Back to map</a>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    const map = L.map('map').setView([-13.5, 34], 7);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OSM contributors'
+    }).addTo(map);
+
+    let selectedMarker = null;
+
+    map.on('click', function(e) {
+      if (selectedMarker) map.removeLayer(selectedMarker);
+      selectedMarker = L.marker(e.latlng).addTo(map);
+      document.getElementById('lat').value = e.latlng.lat;
+      document.getElementById('lng').value = e.latlng.lng;
+      document.getElementById('coordsDisplay').textContent =
+        `Selected: ${e.latlng.lat.toFixed(4)}, ${e.latlng.lng.toFixed(4)}`;
+      map.setView(e.latlng, 12);
+    });
+
+    const form = document.getElementById('registerForm');
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = document.getElementById('name').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const phone = document.getElementById('phone').value.trim();
+      const lat = document.getElementById('lat').value;
+      const lng = document.getElementById('lng').value;
+
+      if (!name || !email || !phone) {
+        showError('All fields are required');
+        return;
+      }
+      if (!lat || !lng) {
+        showError('Please click on the map to select your location');
+        return;
+      }
+
+      try {
+        const response = await fetch('/api/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, email, phone, latitude: parseFloat(lat), longitude: parseFloat(lng) })
+        });
+        const data = await response.json();
+        if (response.ok) {
+          alert('Registration successful! You can now see your marker on the map.');
+          window.location.href = '/';
+        } else {
+          showError(data.error || 'Registration failed');
+        }
+      } catch (err) {
+        showError('Network error. Please try again.');
+      }
+    });
+
+    function showError(msg) {
+      const errorDiv = document.getElementById('formError');
+      errorDiv.textContent = msg;
+      setTimeout(() => errorDiv.textContent = '', 5000);
+    }
+  </script>
+</body>
+</html>
