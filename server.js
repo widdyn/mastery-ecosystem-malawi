@@ -8,35 +8,36 @@ const { supabaseAdmin } = require('./database');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Auto-generated from malawi_districts.geojson via compute_centroids.js
 const DISTRICT_COORDS = {
-  'Balaka': [-14.9833, 34.9667],
-  'Blantyre': [-15.7861, 35.0058],
-  'Chikwawa': [-16.0333, 34.8000],
-  'Chiradzulu': [-15.5833, 35.1833],
-  'Chitipa': [-9.7000, 33.2667],
-  'Dedza': [-14.3667, 34.3333],
-  'Dowa': [-13.6500, 33.9333],
-  'Karonga': [-9.9333, 33.9333],
-  'Kasungu': [-13.0333, 33.4833],
-  'Likoma': [-12.0667, 34.7333],
-  'Lilongwe': [-13.9833, 33.7833],
-  'Machinga': [-14.9667, 35.5167],
-  'Mangochi': [-14.4667, 35.2667],
-  'Mchinji': [-13.8000, 32.9000],
-  'Mulanje': [-16.0333, 35.5000],
-  'Mwanza': [-15.5833, 34.5167],
-  'Mzimba': [-11.9000, 33.6000],
-  'Neno': [-15.4000, 34.6500],
-  'Nkhata Bay': [-11.6000, 34.3000],
-  'Nkhotakota': [-12.9167, 34.3000],
-  'Nsanje': [-16.9167, 35.2667],
-  'Ntcheu': [-14.8333, 34.6667],
-  'Ntchisi': [-13.3667, 33.9167],
-  'Phalombe': [-15.8000, 35.6500],
-  'Rumphi': [-11.0167, 33.8667],
-  'Salima': [-13.7833, 34.4333],
-  'Thyolo': [-16.0667, 35.1333],
-  'Zomba': [-15.3833, 35.3333]
+  "Balaka": [-15.041662322649316, 35.12536196387367],
+  "Blantyre": [-15.710858658945142, 34.95193864193644],
+  "Chikwawa": [-16.372003417830225, 34.78316986307416],
+  "Chiradzulu": [-15.7532209948391, 35.19826040364899],
+  "Chitipa": [-9.720456518914098, 33.26525262566429],
+  "Dedza": [-14.37394426830616, 34.006288088308125],
+  "Dowa": [-13.58431193950937, 33.72425753854994],
+  "Karonga": [-10.006958112143508, 33.89092289504664],
+  "Kasungu": [-12.960750919433625, 33.451082699263765],
+  "Likoma": [-12.04766263144439, 34.694311177837],
+  "Lilongwe": [-14.088934824973974, 33.60120269687682],
+  "Machinga": [-14.917606984185863, 35.39028230212354],
+  "Mangochi": [-14.254412944784907, 35.10528418088066],
+  "Mchinji": [-13.808147527230034, 33.09837149748922],
+  "Mulanje": [-15.940451177905224, 35.530398883631385],
+  "Mwanza": [-15.623386233691845, 34.51627380469349],
+  "Mzimba": [-11.819914933149905, 33.67435340420449],
+  "Neno": [-15.484448694580523, 34.69478651246905],
+  "Nkhata Bay": [-11.62665104275173, 34.05706510791406],
+  "Nkhotakota": [-13.061902755166264, 34.170673346876434],
+  "Nsanje": [-16.65215413039244, 35.10316809918631],
+  "Ntcheu": [-14.79723771205328, 34.63831232887119],
+  "Ntchisi": [-13.273441499301935, 33.9906831598024],
+  "Phalombe": [-15.726292664543646, 35.61250113327227],
+  "Rumphi": [-10.898803825051843, 33.745254919884935],
+  "Salima": [-13.68384847413035, 34.37548628757627],
+  "Thyolo": [-16.13045848640839, 35.104184428224585],
+  "Zomba": [-15.434910281007, 35.30213151191997]
 };
 
 const MALAWI_CENTER = [-13.5, 34.0];
@@ -60,7 +61,29 @@ app.get('/api/users', async (req, res) => {
       .order('created_at', { ascending: false });
 
     if (error) throw error;
-    res.json(data || []);
+
+    // Enrich with district centroid if exact location missing
+    const { data: authData } = await supabaseAdmin
+      .from('auth_users')
+      .select('email, district');
+
+    const authByEmail = {};
+    for (const a of authData || []) {
+      authByEmail[a.email] = a.district;
+    }
+
+    const enriched = (data || []).map(u => {
+      const dist = authByEmail[u.email] || null;
+      let lat = u.latitude;
+      let lng = u.longitude;
+      if ((!lat || !lng) && dist && DISTRICT_COORDS[dist]) {
+        lat = DISTRICT_COORDS[dist][0];
+        lng = DISTRICT_COORDS[dist][1];
+      }
+      return { ...u, latitude: lat, longitude: lng, district: dist };
+    });
+
+    res.json(enriched);
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Database error' });
@@ -401,20 +424,30 @@ app.get('/api/talent', async (req, res) => {
       mapByEmail[mu.email] = mu;
     }
 
-    const talent = (authUsers || []).map(u => ({
-      id: u.id,
-      full_name: u.full_name,
-      email: u.email,
-      phone: u.phone || '',
-      district: u.district || '',
-      bio: u.bio || '',
-      skills: u.skills || [],
-      badges: u.badges || [],
-      avatar_url: u.avatar_url || '',
-      latitude: mapByEmail[u.email]?.latitude || null,
-      longitude: mapByEmail[u.email]?.longitude || null,
-      created_at: u.created_at
-    }));
+    const talent = (authUsers || []).map(u => {
+      const mapRec = mapByEmail[u.email];
+      let lat = mapRec?.latitude || null;
+      let lng = mapRec?.longitude || null;
+      // Fall back to district centroid if no map location set
+      if ((!lat || !lng) && u.district && DISTRICT_COORDS[u.district]) {
+        lat = DISTRICT_COORDS[u.district][0];
+        lng = DISTRICT_COORDS[u.district][1];
+      }
+      return {
+        id: u.id,
+        full_name: u.full_name,
+        email: u.email,
+        phone: u.phone || '',
+        district: u.district || '',
+        bio: u.bio || '',
+        skills: u.skills || [],
+        badges: u.badges || [],
+        avatar_url: u.avatar_url || '',
+        latitude: lat,
+        longitude: lng,
+        created_at: u.created_at
+      };
+    });
 
     res.json(talent);
   } catch (err) {

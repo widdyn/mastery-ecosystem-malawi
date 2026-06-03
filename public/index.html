@@ -98,12 +98,24 @@
         if (!res.ok || !Array.isArray(res.data)) return;
         res.data.forEach(function(t) {
           if (!t.latitude || !t.longitude) return;
+          var initials = t.full_name.split(' ').map(function(n) { return n[0]; }).join('').toUpperCase().slice(0, 2);
           var skills = (t.skills && t.skills.length > 0) ? t.skills.join(', ') : 'Skill pending';
-          var html = '<strong>' + escapeHtml(t.full_name) + '</strong>';
-          if (t.district) html += '<br><i class="fas fa-map-pin"></i> ' + escapeHtml(t.district);
-          html += '<br><i class="fas fa-bolt"></i> ' + escapeHtml(skills);
-          html += '<br><a href="/auth.html" style="color:#1B7C4B;font-weight:600;font-size:0.85rem;">View full profile \u2192</a>';
-          L.marker([t.latitude, t.longitude]).addTo(map).bindPopup(html);
+          var bio = t.bio ? escapeHtml(t.bio.substring(0, 80)) + (t.bio.length > 80 ? '&hellip;' : '') : 'Mastery Ecosystem member';
+          var html = '<div style="text-align:center;min-width:160px;">'
+            + '<div style="width:36px;height:36px;border-radius:50%;background:#1B7C4B;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.9rem;margin:0 auto 6px;">' + escapeHtml(initials) + '</div>'
+            + '<strong style="font-size:0.95rem;">' + escapeHtml(t.full_name) + '</strong><br>'
+            + '<span style="font-size:0.8rem;color:#64748b;">' + escapeHtml(t.district || 'Malawi') + '</span><br>'
+            + '<span style="font-size:0.8rem;color:#1B7C4B;"><i class="fas fa-bolt"></i> ' + escapeHtml(skills) + '</span><br>'
+            + '<span style="font-size:0.78rem;color:#94a3b8;display:block;margin-top:4px;">' + bio + '</span>'
+            + '<a href="/auth.html" style="display:inline-block;margin-top:6px;font-size:0.82rem;color:#1B7C4B;font-weight:600;">View profile \u2192</a>'
+            + '</div>';
+          L.circleMarker([t.latitude, t.longitude], {
+            radius: 8,
+            fillColor: '#1B7C4B',
+            color: '#FFFFFF',
+            weight: 2,
+            fillOpacity: 0.85
+          }).addTo(map).bindPopup(html);
         });
       })
       .catch(function() {});
