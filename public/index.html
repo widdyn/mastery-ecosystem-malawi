@@ -93,9 +93,10 @@
 
     // Load talent markers (auth_users with map locations)
     fetch('/api/talent')
-      .then(r => r.json())
-      .then(talents => {
-        talents.forEach(t => {
+      .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
+      .then(function(res) {
+        if (!res.ok || !Array.isArray(res.data)) return;
+        res.data.forEach(function(t) {
           if (!t.latitude || !t.longitude) return;
           var skills = (t.skills && t.skills.length > 0) ? t.skills.join(', ') : 'Skill pending';
           var html = '<strong>' + escapeHtml(t.full_name) + '</strong>';

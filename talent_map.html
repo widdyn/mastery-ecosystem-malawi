@@ -673,6 +673,7 @@
 
       // Populate skill filter options from data
       function populateFilters() {
+        if (!Array.isArray(talents)) { renderCards(); return; }
         var skillSet = {};
         var districtSet = {};
         talents.forEach(function(t) {
@@ -704,13 +705,18 @@
       // Fetch talent from API
       function loadTalents() {
         fetch('/api/talent')
-          .then(function(r) { return r.json(); })
-          .then(function(data) {
-            talents = data || [];
+          .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
+          .then(function(res) {
+            if (!res.ok || !Array.isArray(res.data)) {
+              summarySpan.innerText = 'Could not load talent data.';
+              if (res.data && res.data.error) console.error('Talent API:', res.data.error);
+              return;
+            }
+            talents = res.data;
             populateFilters();
           })
           .catch(function() {
-            summarySpan.innerText = 'Could not load talent data.';
+            summarySpan.innerText = 'Talent data unavailable \u2014 start the server with \u201cnpm start\u201d';
           });
       }
 
@@ -842,9 +848,10 @@
       }
 
       fetch('/api/talent')
-        .then(r => r.json())
-        .then(talents => {
-          talents.forEach(t => {
+        .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
+        .then(function(res) {
+          if (!res.ok || !Array.isArray(res.data)) return;
+          res.data.forEach(function(t) {
             if (!t.latitude || !t.longitude) return;
             var skills = (t.skills && t.skills.length > 0) ? t.skills.join(', ') : 'Skill pending';
             var html = '<strong>' + escapeHtml(t.full_name) + '</strong>';
