@@ -10,8 +10,108 @@
   <link rel="stylesheet" href="style.css">
   <script src="theme.js"></script>
   <style>
+    /* ---- Toast notifications ---- */
+    .toast-container {
+      position: fixed;
+      top: calc(var(--nav-height, 72px) + var(--space-4));
+      right: var(--space-4);
+      z-index: 10000;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-3);
+      pointer-events: none;
+      max-width: 420px;
+      width: calc(100% - var(--space-8));
+    }
+
+    .toast {
+      pointer-events: auto;
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-3);
+      padding: var(--space-4) var(--space-5);
+      border-radius: var(--radius-md);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.06);
+      font-size: 0.9rem;
+      line-height: 1.5;
+      color: #FFFFFF;
+      transform: translateX(120%);
+      opacity: 0;
+      transition: transform 400ms cubic-bezier(0.34, 1.56, 0.64, 1), opacity 300ms ease;
+      position: relative;
+    }
+
+    .toast.show {
+      transform: translateX(0);
+      opacity: 1;
+    }
+
+    .toast.hiding {
+      transform: translateX(120%);
+      opacity: 0;
+      transition: transform 300ms cubic-bezier(0.22, 0.61, 0.36, 1), opacity 250ms ease;
+    }
+
+    .toast-success {
+      background: #065F46;
+      border-left: 4px solid #34D399;
+    }
+
+    .toast-error {
+      background: #991B1B;
+      border-left: 4px solid #F87171;
+    }
+
+    .toast-icon {
+      flex-shrink: 0;
+      font-size: 1.1rem;
+      margin-top: 1px;
+    }
+
+    .toast-body {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .toast-title {
+      font-weight: 700;
+      font-size: 0.85rem;
+      margin-bottom: var(--space-1);
+    }
+
+    .toast-message {
+      opacity: 0.85;
+      font-size: 0.83rem;
+    }
+
+    .toast-close {
+      flex-shrink: 0;
+      background: none;
+      border: none;
+      color: rgba(255,255,255,0.5);
+      cursor: pointer;
+      font-size: 0.9rem;
+      padding: 2px;
+      line-height: 1;
+      transition: color 200ms ease;
+    }
+
+    .toast-close:hover {
+      color: #FFFFFF;
+    }
+
+    @keyframes toastIn {
+      from { transform: translateX(120%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    @keyframes toastOut {
+      from { transform: translateX(0); opacity: 1; }
+      to { transform: translateX(120%); opacity: 0; }
+    }
+
     .auth-root {
-      min-height: 100vh;
+      min-height: calc(100vh - var(--nav-height, 72px));
       display: flex;
       align-items: center;
       justify-content: center;
@@ -494,24 +594,6 @@
     .auth-submit.loading .auth-submit-text { display: none; }
     .auth-submit.loading .auth-submit-spinner { display: inline; }
 
-    /* Error message */
-    .auth-error {
-      display: none;
-      align-items: center;
-      gap: var(--space-2);
-      padding: var(--space-3) var(--space-4);
-      background: rgba(220, 38, 38, 0.06);
-      border: 1px solid rgba(220, 38, 38, 0.12);
-      border-radius: var(--radius-sm);
-      font-size: 0.84rem;
-      color: #DC2626;
-      margin-bottom: var(--space-5);
-    }
-
-    .auth-error.show { display: flex; }
-
-    .auth-error i { font-size: 0.85rem; flex-shrink: 0; }
-
     /* Alt link */
     .auth-alt {
       text-align: center;
@@ -534,6 +616,24 @@
   </style>
 </head>
 <body>
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="index.html" class="logo">Mastery <span>Ecosystem</span></a>
+      <button class="hamburger" id="hamburgerBtn" aria-label="Menu"><i class="fas fa-bars"></i></button>
+      <ul class="nav-menu" id="navMenu">
+        <li><a href="Our_model.html">Our Model</a></li>
+        <li><a href="talent_map.html">Talent Map</a></li>
+        <li><a href="investor_impact_dashboard.html">Investor Impact</a></li>
+        <li><a href="manifesto.html">Manifesto</a></li>
+        <li><a href="About_us.html">About</a></li>
+        <li><a href="contact.html">Contact</a></li>
+        <li class="nav-auth-item"><a href="auth.html" class="nav-auth-link">Sign Up</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="toast-container" id="toastContainer"></div>
+
   <div class="auth-root">
     <div class="auth-layout">
 
@@ -579,11 +679,6 @@
         <div class="auth-tabs">
           <button class="auth-tab active" data-tab="signin">Sign In</button>
           <button class="auth-tab" data-tab="signup">Sign Up</button>
-        </div>
-
-        <div class="auth-error" id="authError">
-          <i class="fas fa-exclamation-circle"></i>
-          <span id="authErrorText"></span>
         </div>
 
         <!-- SIGN IN -->
@@ -713,6 +808,62 @@
 
   <script>
     (function() {
+      /* ---- Toast notifications ---- */
+      var toastContainer = document.getElementById('toastContainer');
+      var toastId = 0;
+
+      function showToast(type, title, message, duration) {
+        duration = duration || 5000;
+        toastId++;
+        var el = document.createElement('div');
+        el.className = 'toast toast-' + type;
+        el.id = 'toast-' + toastId;
+        var icon = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
+        el.innerHTML = '<div class="toast-icon"><i class="fas ' + icon + '"></i></div>'
+          + '<div class="toast-body">'
+          + '<div class="toast-title">' + title + '</div>'
+          + '<div class="toast-message">' + message + '</div>'
+          + '</div>'
+          + '<button class="toast-close" onclick="document.getElementById(\'' + el.id + '\').classList.add(\'hiding\');setTimeout(function(){if(document.getElementById(\'' + el.id + '\'))document.getElementById(\'' + el.id + '\').remove()},300)"><i class="fas fa-xmark"></i></button>';
+        toastContainer.appendChild(el);
+        requestAnimationFrame(function() { el.classList.add('show'); });
+        var closeTimer = setTimeout(function() {
+          el.classList.add('hiding');
+          setTimeout(function() { if (el.parentNode) el.remove(); }, 300);
+        }, duration);
+        el.addEventListener('click', function() {
+          clearTimeout(closeTimer);
+          el.classList.add('hiding');
+          setTimeout(function() { if (el.parentNode) el.remove(); }, 300);
+        });
+        return el;
+      }
+
+      function clearToasts() {
+        var toasts = toastContainer.querySelectorAll('.toast');
+        toasts.forEach(function(t) { t.classList.add('hiding'); setTimeout(function() { if (t.parentNode) t.remove(); }, 300); });
+      }
+
+      /* ---- Hamburger ---- */
+      var hamburger = document.getElementById('hamburgerBtn');
+      var navMenu = document.getElementById('navMenu');
+      if (hamburger && navMenu) {
+        hamburger.addEventListener('click', function(e) {
+          e.stopPropagation();
+          navMenu.classList.toggle('show');
+        });
+        navMenu.querySelectorAll('a').forEach(function(link) {
+          link.addEventListener('click', function() {
+            if (window.innerWidth <= 768) navMenu.classList.remove('show');
+          });
+        });
+      }
+      window.addEventListener('resize', function() {
+        if (window.innerWidth > 768 && navMenu && navMenu.classList.contains('show')) {
+          navMenu.classList.remove('show');
+        }
+      });
+
       /* ---- Tab switching ---- */
       var tabs = document.querySelectorAll('.auth-tab');
       var forms = {
@@ -734,7 +885,7 @@
           panelHeader.querySelector('h1').innerHTML = headerTexts[tabId].h1;
           panelHeader.querySelector('p').innerHTML = headerTexts[tabId].p;
         }
-        errorBox.classList.remove('show');
+        clearToasts();
         clearAllFeedbacks();
       }
 
@@ -744,12 +895,6 @@
 
       document.getElementById('switchToSignUp').addEventListener('click', function(e) { e.preventDefault(); switchTab('signup'); });
       document.getElementById('switchToSignIn').addEventListener('click', function(e) { e.preventDefault(); switchTab('signin'); });
-
-      /* ---- Error display ---- */
-      var errorBox = document.getElementById('authError');
-      var errorText = document.getElementById('authErrorText');
-      function showError(msg) { errorText.textContent = msg; errorBox.classList.add('show'); }
-      function clearError() { errorBox.classList.remove('show'); }
 
       /* ---- Password toggle ---- */
       function setupPwToggle(inputId, toggleId) {
@@ -826,7 +971,7 @@
 
       document.getElementById('signInForm').addEventListener('submit', function(e) {
         e.preventDefault();
-        clearError();
+        clearToasts();
         var valid = true;
         if (!validateEmail(siEmail.value)) { siEmail.classList.add('is-invalid'); setInvalid(fbSiEmail, 'Please enter a valid email'); valid = false; }
         if (!siPassword.value.trim()) { siPassword.classList.add('is-invalid'); setInvalid(fbSiPassword, 'Please enter your password'); valid = false; }
@@ -844,17 +989,19 @@
         .then(function(r) { return r.json().then(function(d) { return { status: r.status, data: d }; }); })
         .then(function(res) {
           if (res.status === 200) {
+            var name = res.data.user.full_name.split(' ')[0];
+            showToast('success', 'Welcome back, ' + name + '!', 'Redirecting to your profile\u2026', 2000);
             localStorage.setItem('auth_token', res.data.token);
             localStorage.setItem('auth_user', JSON.stringify(res.data.user));
-            window.location.href = 'profile.html';
+            setTimeout(function() { window.location.href = 'profile.html'; }, 800);
           } else {
-            showError(res.data.error || 'Invalid email or password');
+            showToast('error', 'Sign in failed', res.data.error || 'Invalid email or password');
             btn.classList.remove('loading');
             btn.disabled = false;
           }
         })
         .catch(function() {
-          showError('Connection error. Please try again.');
+          showToast('error', 'Connection error', 'Please check your internet and try again.');
           btn.classList.remove('loading');
           btn.disabled = false;
         });
@@ -898,14 +1045,14 @@
 
       document.getElementById('signUpForm').addEventListener('submit', function(e) {
         e.preventDefault();
-        clearError();
+        clearToasts();
         var valid = true;
 
         if (!validateName(suName.value)) { suName.classList.add('is-invalid'); setInvalid(fbSuName, 'Please enter your full name'); valid = false; }
         if (!validateEmail(suEmail.value)) { suEmail.classList.add('is-invalid'); setInvalid(fbSuEmail, 'Please enter a valid email'); valid = false; }
         if (!validatePassword(suPassword.value)) { suPassword.classList.add('is-invalid'); setInvalid(fbSuPassword, 'At least 6 characters required'); valid = false; }
         if (suPassword.value !== suConfirm.value) { suConfirm.classList.add('is-invalid'); setInvalid(fbSuConfirm, 'Passwords don&rsquo;t match'); valid = false; }
-        if (!suTerms.checked) { showError('Please agree to the Terms of Service before continuing.'); valid = false; }
+        if (!suTerms.checked) { showToast('error', 'Terms required', 'Please agree to the Terms of Service before continuing.'); valid = false; }
         if (!valid) return;
 
         var btn = document.getElementById('suSubmitBtn');
@@ -928,17 +1075,19 @@
         .then(function(r) { return r.json().then(function(d) { return { status: r.status, data: d }; }); })
         .then(function(res) {
           if (res.status === 201) {
+            var name = res.data.user.full_name.split(' ')[0];
+            showToast('success', 'Welcome to Mastery Ecosystem, ' + name + '!', 'Creating your profile\u2026', 2000);
             localStorage.setItem('auth_token', res.data.token);
             localStorage.setItem('auth_user', JSON.stringify(res.data.user));
-            window.location.href = 'profile.html';
+            setTimeout(function() { window.location.href = 'profile.html'; }, 800);
           } else {
-            showError(res.data.error || 'Signup failed. Please try again.');
+            showToast('error', 'Signup failed', res.data.error || 'Please try again.');
             btn.classList.remove('loading');
             btn.disabled = false;
           }
         })
         .catch(function() {
-          showError('Connection error. Please check your internet and try again.');
+          showToast('error', 'Connection error', 'Please check your internet and try again.');
           btn.classList.remove('loading');
           btn.disabled = false;
         });
