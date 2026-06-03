@@ -8,6 +8,39 @@ const { supabaseAdmin } = require('./database');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+const DISTRICT_COORDS = {
+  'Balaka': [-14.9833, 34.9667],
+  'Blantyre': [-15.7861, 35.0058],
+  'Chikwawa': [-16.0333, 34.8000],
+  'Chiradzulu': [-15.5833, 35.1833],
+  'Chitipa': [-9.7000, 33.2667],
+  'Dedza': [-14.3667, 34.3333],
+  'Dowa': [-13.6500, 33.9333],
+  'Karonga': [-9.9333, 33.9333],
+  'Kasungu': [-13.0333, 33.4833],
+  'Likoma': [-12.0667, 34.7333],
+  'Lilongwe': [-13.9833, 33.7833],
+  'Machinga': [-14.9667, 35.5167],
+  'Mangochi': [-14.4667, 35.2667],
+  'Mchinji': [-13.8000, 32.9000],
+  'Mulanje': [-16.0333, 35.5000],
+  'Mwanza': [-15.5833, 34.5167],
+  'Mzimba': [-11.9000, 33.6000],
+  'Neno': [-15.4000, 34.6500],
+  'Nkhata Bay': [-11.6000, 34.3000],
+  'Nkhotakota': [-12.9167, 34.3000],
+  'Nsanje': [-16.9167, 35.2667],
+  'Ntcheu': [-14.8333, 34.6667],
+  'Ntchisi': [-13.3667, 33.9167],
+  'Phalombe': [-15.8000, 35.6500],
+  'Rumphi': [-11.0167, 33.8667],
+  'Salima': [-13.7833, 34.4333],
+  'Thyolo': [-16.0667, 35.1333],
+  'Zomba': [-15.3833, 35.3333]
+};
+
+const MALAWI_CENTER = [-13.5, 34.0];
+
 app.use(cors());
 app.use(express.json());
 app.use(express.static('public'));
@@ -107,6 +140,22 @@ app.post('/api/auth/signup', async (req, res) => {
 
     if (error) throw error;
 
+    // Also create a map_users record so the user appears on the map
+    const coords = DISTRICT_COORDS[data.district] || MALAWI_CENTER;
+    const { error: mapErr } = await supabaseAdmin
+      .from('map_users')
+      .insert({
+        name: data.full_name,
+        email: data.email,
+        phone: data.phone || '',
+        latitude: coords[0],
+        longitude: coords[1]
+      });
+
+    if (mapErr && mapErr.code !== '23505') {
+      console.error('map_users insert warning:', mapErr);
+    }
+
     const user = {
       id: data.id,
       full_name: data.full_name,
@@ -117,6 +166,8 @@ app.post('/api/auth/signup', async (req, res) => {
       skills: data.skills || [],
       badges: data.badges || [],
       avatar_url: data.avatar_url || '',
+      latitude: coords[0],
+      longitude: coords[1],
       created_at: data.created_at
     };
 
@@ -151,6 +202,14 @@ app.post('/api/auth/signin', async (req, res) => {
     }
 
     const token = generateToken();
+
+    // Fetch map location
+    const { data: mapData } = await supabaseAdmin
+      .from('map_users')
+      .select('latitude, longitude')
+      .eq('email', email)
+      .maybeSingle();
+
     const user = {
       id: userRow.id,
       full_name: userRow.full_name,
@@ -161,6 +220,8 @@ app.post('/api/auth/signin', async (req, res) => {
       skills: userRow.skills || [],
       badges: userRow.badges || [],
       avatar_url: userRow.avatar_url || '',
+      latitude: mapData?.latitude || null,
+      longitude: mapData?.longitude || null,
       created_at: userRow.created_at
     };
 
@@ -184,6 +245,12 @@ app.get('/api/auth/profile', async (req, res) => {
     if (error) throw error;
     if (!userRow) return res.status(404).json({ error: 'User not found' });
 
+    const { data: mapData } = await supabaseAdmin
+      .from('map_users')
+      .select('latitude, longitude')
+      .eq('email', email)
+      .maybeSingle();
+
     const user = {
       id: userRow.id,
       full_name: userRow.full_name,
@@ -194,6 +261,8 @@ app.get('/api/auth/profile', async (req, res) => {
       skills: userRow.skills || [],
       badges: userRow.badges || [],
       avatar_url: userRow.avatar_url || '',
+      latitude: mapData?.latitude || null,
+      longitude: mapData?.longitude || null,
       created_at: userRow.created_at
     };
 
@@ -233,6 +302,124 @@ app.put('/api/auth/profile', async (req, res) => {
     res.json({ message: 'Profile updated' });
   } catch (err) {
     res.status(500).json({ error: err.message || 'Update failed' });
+  }
+});
+
+// ===================== MAP LOCATION (for auth users) =====================
+
+app.get('/api/auth/map-location', async (req, res) => {
+  const email = req.headers['x-user-email'];
+  if (!email) return res.status(401).json({ error: 'Unauthorized' });
+
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('map_users')
+      .select('latitude, longitude')
+      .eq('email', email)
+      .maybeSingle();
+
+    if (error) throw error;
+    if (!data) return res.json({ latitude: null, longitude: null });
+
+    res.json({ latitude: data.latitude, longitude: data.longitude });
+  } catch (err) {
+    res.status(500).json({ error: err.message || 'Failed to load map location' });
+  }
+});
+
+app.put('/api/auth/map-location', async (req, res) => {
+  const email = req.headers['x-user-email'];
+  if (!email) return res.status(401).json({ error: 'Unauthorized' });
+
+  const { latitude, longitude } = req.body;
+
+  if (latitude === undefined || longitude === undefined) {
+    return res.status(400).json({ error: 'Latitude and longitude are required' });
+  }
+
+  if (latitude < -17 || latitude > -9 || longitude < 32 || longitude > 36) {
+    return res.status(400).json({ error: 'Coordinates must be inside Malawi' });
+  }
+
+  try {
+    const { data: existing } = await supabaseAdmin
+      .from('map_users')
+      .select('id')
+      .eq('email', email)
+      .maybeSingle();
+
+    if (existing) {
+      const { error } = await supabaseAdmin
+        .from('map_users')
+        .update({ latitude, longitude })
+        .eq('email', email);
+      if (error) throw error;
+    } else {
+      const { data: userData } = await supabaseAdmin
+        .from('auth_users')
+        .select('full_name, phone')
+        .eq('email', email)
+        .single();
+
+      const { error } = await supabaseAdmin
+        .from('map_users')
+        .insert({
+          name: userData.full_name,
+          email,
+          phone: userData.phone || '',
+          latitude,
+          longitude
+        });
+      if (error) throw error;
+    }
+
+    res.json({ message: 'Map location updated', latitude, longitude });
+  } catch (err) {
+    res.status(500).json({ error: err.message || 'Failed to update map location' });
+  }
+});
+
+// ===================== TALENT MAP DATA =====================
+
+app.get('/api/talent', async (req, res) => {
+  try {
+    const { data: authUsers, error: authErr } = await supabaseAdmin
+      .from('auth_users')
+      .select('id, full_name, email, phone, district, bio, skills, badges, avatar_url, created_at')
+      .order('created_at', { ascending: false });
+
+    if (authErr) throw authErr;
+
+    const { data: mapUsers, error: mapErr } = await supabaseAdmin
+      .from('map_users')
+      .select('email, latitude, longitude');
+
+    if (mapErr) throw mapErr;
+
+    const mapByEmail = {};
+    for (const mu of mapUsers || []) {
+      mapByEmail[mu.email] = mu;
+    }
+
+    const talent = (authUsers || []).map(u => ({
+      id: u.id,
+      full_name: u.full_name,
+      email: u.email,
+      phone: u.phone || '',
+      district: u.district || '',
+      bio: u.bio || '',
+      skills: u.skills || [],
+      badges: u.badges || [],
+      avatar_url: u.avatar_url || '',
+      latitude: mapByEmail[u.email]?.latitude || null,
+      longitude: mapByEmail[u.email]?.longitude || null,
+      created_at: u.created_at
+    }));
+
+    res.json(talent);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message || 'Failed to load talent data' });
   }
 });
 

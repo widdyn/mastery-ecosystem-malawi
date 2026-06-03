@@ -42,7 +42,7 @@
 </head>
 <body>
   <div id="map"></div>
-  <a href="/register.html" class="register-button">+ Register Your Location</a>
+  <a href="/auth.html" class="register-button">+ Join the Talent Map</a>
   <div class="legend">
     <div class="legend-item"><div class="legend-color" style="background: #a6cee3; border: 1px solid #2b8cbe;"></div> District boundary</div>
     <div class="legend-item"><div class="legend-color" style="background: #e74c3c; width: 10px; height: 10px; border-radius: 50%;"></div> Registered talent</div>
@@ -81,26 +81,6 @@
       })
       .catch(err => console.error('Failed to load district boundaries:', err));
 
-    // Load user markers
-    async function loadUsers() {
-      try {
-        const response = await fetch('/api/users');
-        const users = await response.json();
-        users.forEach(user => {
-          const marker = L.marker([user.latitude, user.longitude]).addTo(map);
-          const popupHtml = `
-            <strong>${escapeHtml(user.name)}</strong><br>
-            Phone: ${escapeHtml(user.phone)}<br>
-            Email: ${escapeHtml(user.email)}<br>
-            <a href="/profile/${user.id}" target="_blank">View full profile</a>
-          `;
-          marker.bindPopup(popupHtml);
-        });
-      } catch (err) {
-        console.error('Error loading users:', err);
-      }
-    }
-
     function escapeHtml(str) {
       if (!str) return '';
       return str.replace(/[&<>]/g, function(m) {
@@ -111,7 +91,21 @@
       });
     }
 
-    loadUsers();
+    // Load talent markers (auth_users with map locations)
+    fetch('/api/talent')
+      .then(r => r.json())
+      .then(talents => {
+        talents.forEach(t => {
+          if (!t.latitude || !t.longitude) return;
+          var skills = (t.skills && t.skills.length > 0) ? t.skills.join(', ') : 'Skill pending';
+          var html = '<strong>' + escapeHtml(t.full_name) + '</strong>';
+          if (t.district) html += '<br><i class="fas fa-map-pin"></i> ' + escapeHtml(t.district);
+          html += '<br><i class="fas fa-bolt"></i> ' + escapeHtml(skills);
+          html += '<br><a href="/auth.html" style="color:#1B7C4B;font-weight:600;font-size:0.85rem;">View full profile \u2192</a>';
+          L.marker([t.latitude, t.longitude]).addTo(map).bindPopup(html);
+        });
+      })
+      .catch(function() {});
   </script>
 </body>
 </html>

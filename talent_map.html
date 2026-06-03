@@ -591,17 +591,7 @@
 
   <script>
     (function() {
-      // ---------- talent data ----------
-      const talents = [
-        { name: "Kondwani Banda", district: "Mzimba", skill: "Solar Installation", availability: "Open to Work", description: "Installed solar systems for 20 households in my village.", initials: "KB", video: true, badge2: null },
-        { name: "Chisomo Phiri", district: "Lilongwe", skill: "Agri-tech", availability: "Seeking Funding", description: "Developed a low-cost drip irrigation kit.", initials: "CP", video: true, badge2: null },
-        { name: "Grace Mwale", district: "Blantyre", skill: "Digital Marketing", availability: "Available for Freelance", description: "Managed social media for 5 local SMEs.", initials: "GM", video: true, badge2: "Content" },
-        { name: "Tione Nyirenda", district: "Dedza", skill: "Coding", availability: "Open to Work", description: "Built a mobile money tracker for vendors.", initials: "TN", video: false, badge2: null },
-        { name: "Zione Banda", district: "Mzuzu", skill: "AI Data Labeling", availability: "Open to Work", description: "Labeled 10k images for agri-tech startup.", initials: "ZB", video: true, badge2: null },
-        { name: "Blessings Mhone", district: "Salima", skill: "Solar Installation", availability: "Available for Freelance", description: "Maintains solar pumps in Salima.", initials: "BM", video: false, badge2: "Maintenance" },
-        { name: "Fatima Nkhata", district: "Lilongwe", skill: "Agri-tech", availability: "Seeking Funding", description: "Created a mushroom growing kit from waste.", initials: "FN", video: true, badge2: null },
-        { name: "Yamikani Chisi", district: "Blantyre", skill: "Coding", availability: "Available for Freelance", description: "Built an inventory system for a hardware store.", initials: "YC", video: false, badge2: null }
-      ];
+      let talents = [];
 
       const talentGrid = document.getElementById('talentGrid');
       const summarySpan = document.getElementById('summary');
@@ -614,6 +604,16 @@
       // Map district paths
       const districtPaths = document.querySelectorAll('.district');
       let activeDistrict = null;
+
+      function getInitials(name) {
+        return name.split(' ').map(function(n) { return n[0]; }).join('').toUpperCase().slice(0, 2);
+      }
+
+      function escapeHtml(str) {
+        var div = document.createElement('div');
+        div.appendChild(document.createTextNode(str));
+        return div.innerHTML;
+      }
 
       // Helper to clear map highlights
       function clearMapHighlight() {
@@ -628,68 +628,107 @@
 
         const filtered = talents.filter(t => {
           if (district !== 'all' && t.district !== district) return false;
-          if (skill !== 'all' && t.skill !== skill) return false;
-          if (availability !== 'all' && t.availability !== availability) return false;
+          if (skill !== 'all' && (t.skills || []).indexOf(skill) === -1) return false;
+          if (availability !== 'all' && (t.availability || 'Open to Work') !== availability) return false;
           return true;
         });
 
-        // Update summary
-        summarySpan.innerText = `Showing ${filtered.length} of ${talents.length} talents`;
+        summarySpan.innerText = 'Showing ' + filtered.length + ' of ' + talents.length + ' talents';
 
-        // Build HTML
         let html = '';
-        filtered.forEach(t => {
-          const badge2Html = t.badge2 ? `<span class="badge"><i class="fas fa-tag"></i> ${t.badge2}</span>` : '';
-          const videoHtml = t.video ? `<span class="video-icon" onclick="openVideoModal('${t.name}')"><i class="fas fa-play"></i> 30s video</span>` : '';
-          const availabilityClass = t.availability === 'Open to Work' ? 'tag-open' : (t.availability === 'Seeking Funding' ? 'tag-funding' : 'tag-freelance');
-          html += `<div class="talent-card card">
-            <div class="card-header">
-              <div class="profile-img">${t.initials}</div>
-              <div class="name-district">
-                <h3>${t.name}</h3>
-                <div class="district-name"><i class="fas fa-map-marker-alt" style="color: var(--color-accent);"></i> ${t.district}</div>
-              </div>
-            </div>
-            <div class="badge-container">
-              <span class="badge"><i class="fas fa-bolt"></i> ${t.skill}</span>
-              ${badge2Html}
-            </div>
-            <div class="availability-tag ${availabilityClass}">${t.availability}</div>
-            <p class="card-quote">“${t.description}”</p>
-            <div class="card-footer">
-              ${videoHtml}
-              <button class="btn-outline-small" onclick="viewProfile('${t.name}')">View Profile</button>
-            </div>
-          </div>`;
+        filtered.forEach(function(t) {
+          var initials = getInitials(t.full_name);
+          var skillHtml = (t.skills && t.skills.length > 0)
+            ? '<span class="badge"><i class="fas fa-bolt"></i> ' + escapeHtml(t.skills[0]) + '</span>'
+            : '<span class="badge"><i class="fas fa-bolt"></i> Skill pending</span>';
+          var badge2Html = (t.badges && t.badges.length > 0)
+            ? '<span class="badge"><i class="fas fa-tag"></i> ' + escapeHtml(t.badges[0]) + '</span>'
+            : '';
+          var availability = t.availability || 'Open to Work';
+          var availabilityClass = availability === 'Open to Work' ? 'tag-open' : (availability === 'Seeking Funding' ? 'tag-funding' : 'tag-freelance');
+          var desc = t.bio || 'No bio yet.';
+          html += '<div class="talent-card card">'
+            + '<div class="card-header">'
+            + '<div class="profile-img">' + escapeHtml(initials) + '</div>'
+            + '<div class="name-district">'
+            + '<h3>' + escapeHtml(t.full_name) + '</h3>'
+            + '<div class="district-name"><i class="fas fa-map-marker-alt" style="color: var(--color-accent);"></i> ' + escapeHtml(t.district || 'Malawi') + '</div>'
+            + '</div></div>'
+            + '<div class="badge-container">' + skillHtml + badge2Html + '</div>'
+            + '<div class="availability-tag ' + availabilityClass + '">' + availability + '</div>'
+            + '<p class="card-quote">\u201c' + escapeHtml(desc) + '\u201d</p>'
+            + '<div class="card-footer">'
+            + '<button class="btn-outline-small" onclick="viewProfile(\'' + escapeHtml(t.full_name) + '\', ' + t.id + ')">View Profile</button>'
+            + '</div></div>';
         });
         talentGrid.innerHTML = html;
-        
-        // Setup visual animations
-        const animElements = talentGrid.querySelectorAll('.talent-card');
-        animElements.forEach((item, idx) => {
+
+        var animElements = talentGrid.querySelectorAll('.talent-card');
+        animElements.forEach(function(item, idx) {
           item.classList.add('stagger-item');
-          item.style.transitionDelay = `${(idx % 3) * 75}ms`;
-          setTimeout(() => item.classList.add('appear'), 50);
+          item.style.transitionDelay = (idx % 3) * 75 + 'ms';
+          setTimeout(function() { item.classList.add('appear'); }, 50);
         });
       }
 
-      // Initial render
-      renderCards();
+      // Populate skill filter options from data
+      function populateFilters() {
+        var skillSet = {};
+        var districtSet = {};
+        talents.forEach(function(t) {
+          if (t.district) districtSet[t.district] = true;
+          (t.skills || []).forEach(function(s) { skillSet[s] = true; });
+        });
+        var skills = Object.keys(skillSet).sort();
+        var districts = Object.keys(districtSet).sort();
+
+        // Update skill select
+        var currentVal = skillSelect.value;
+        skillSelect.innerHTML = '<option value="all">All Skills</option>';
+        skills.forEach(function(s) {
+          skillSelect.innerHTML += '<option value="' + s.replace(/"/g, '&quot;') + '">' + s + '</option>';
+        });
+        skillSelect.value = currentVal !== 'all' && skills.indexOf(currentVal) !== -1 ? currentVal : 'all';
+
+        // Update district select
+        currentVal = districtSelect.value;
+        districtSelect.innerHTML = '<option value="all">All Districts</option>';
+        districts.forEach(function(d) {
+          districtSelect.innerHTML += '<option value="' + d.replace(/"/g, '&quot;') + '">' + d + '</option>';
+        });
+        districtSelect.value = currentVal !== 'all' && districts.indexOf(currentVal) !== -1 ? currentVal : 'all';
+
+        renderCards();
+      }
+
+      // Fetch talent from API
+      function loadTalents() {
+        fetch('/api/talent')
+          .then(function(r) { return r.json(); })
+          .then(function(data) {
+            talents = data || [];
+            populateFilters();
+          })
+          .catch(function() {
+            summarySpan.innerText = 'Could not load talent data.';
+          });
+      }
+
+      loadTalents();
 
       // Filter apply
-      applyBtn.addEventListener('click', () => {
-        // sync map highlight with district selection
-        const selectedDistrict = districtSelect.value;
+      applyBtn.addEventListener('click', function() {
+        var selectedDistrict = districtSelect.value;
         clearMapHighlight();
         if (selectedDistrict !== 'all') {
-          const activePath = document.getElementById(`district${selectedDistrict}`);
+          var activePath = document.getElementById('district' + selectedDistrict);
           if (activePath) activePath.classList.add('active');
         }
         renderCards();
       });
 
       // Reset filters
-      resetBtn.addEventListener('click', () => {
+      resetBtn.addEventListener('click', function() {
         districtSelect.value = 'all';
         skillSelect.value = 'all';
         availabilitySelect.value = 'all';
@@ -698,9 +737,9 @@
       });
 
       // Map click handler
-      districtPaths.forEach(path => {
-        path.addEventListener('click', (e) => {
-          const district = path.getAttribute('data-district');
+      districtPaths.forEach(function(path) {
+        path.addEventListener('click', function(e) {
+          var district = path.getAttribute('data-district');
           if (district) {
             districtSelect.value = district;
             clearMapHighlight();
@@ -711,36 +750,36 @@
       });
 
       // Hamburger menu
-      const hamburger = document.getElementById('hamburgerBtn');
-      const navMenu = document.getElementById('navMenu');
+      var hamburger = document.getElementById('hamburgerBtn');
+      var navMenu = document.getElementById('navMenu');
       if (hamburger && navMenu) {
-        hamburger.addEventListener('click', (e) => {
+        hamburger.addEventListener('click', function(e) {
           e.stopPropagation();
           navMenu.classList.toggle('show');
         });
-        navMenu.querySelectorAll('a').forEach(link => {
-          link.addEventListener('click', () => {
+        navMenu.querySelectorAll('a').forEach(function(link) {
+          link.addEventListener('click', function() {
             if (window.innerWidth <= 768) navMenu.classList.remove('show');
           });
         });
       }
-      window.addEventListener('resize', () => {
-        if (window.innerWidth > 768 && navMenu?.classList.contains('show')) {
+      window.addEventListener('resize', function() {
+        if (window.innerWidth > 768 && navMenu && navMenu.classList.contains('show')) {
           navMenu.classList.remove('show');
         }
       });
 
       // Modal functions
-      window.openVideoModal = (name) => {
+      window.openVideoModal = function(name) {
         document.getElementById('videoModal').style.display = 'flex';
       };
-      window.viewProfile = (name) => {
-        alert(`Profile of ${name} – (full profile would open here)`);
+      window.viewProfile = function(name, id) {
+        alert('Profile of ' + name + ' \u2013 View at profile.html (sign in required)');
       };
-      document.getElementById('closeModal').addEventListener('click', () => {
+      document.getElementById('closeModal').addEventListener('click', function() {
         document.getElementById('videoModal').style.display = 'none';
       });
-      window.addEventListener('click', (e) => {
+      window.addEventListener('click', function(e) {
         if (e.target.classList.contains('modal')) {
           e.target.style.display = 'none';
         }
@@ -795,16 +834,29 @@
         .catch(err => console.error('Failed to load district boundaries:', err));
 
       // Load user markers from API
-      fetch('http://localhost:3000/api/users')
+      function escapeHtml(str) {
+        if (!str) return '';
+        var div = document.createElement('div');
+        div.appendChild(document.createTextNode(str));
+        return div.innerHTML;
+      }
+
+      fetch('/api/talent')
         .then(r => r.json())
-        .then(users => {
-          users.forEach(user => {
-            L.marker([user.latitude, user.longitude])
+        .then(talents => {
+          talents.forEach(t => {
+            if (!t.latitude || !t.longitude) return;
+            var skills = (t.skills && t.skills.length > 0) ? t.skills.join(', ') : 'Skill pending';
+            var html = '<strong>' + escapeHtml(t.full_name) + '</strong>';
+            if (t.district) html += '<br><i class="fas fa-map-pin"></i> ' + escapeHtml(t.district);
+            html += '<br><i class="fas fa-bolt"></i> ' + escapeHtml(skills);
+            html += '<br><a href="auth.html" style="color:#1B7C4B;font-weight:600;font-size:0.85rem;">View full profile \u2192</a>';
+            L.marker([t.latitude, t.longitude])
               .addTo(map)
-              .bindPopup(`<strong>${user.name}</strong><br>Phone: ${user.phone}<br>Email: ${user.email}`);
+              .bindPopup(html);
           });
         })
-        .catch(() => {}); // silently fail if backend not running
+        .catch(function() {});
     })();
   </script>
 </body>

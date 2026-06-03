@@ -266,6 +266,15 @@
             </div>
           </div>
 
+          <div class="profile-section full-width" id="locationSection">
+            <div class="profile-section-header">
+              <h3><i class="fas fa-map-pin"></i> On the Map</h3>
+            </div>
+            <div id="profileLocation">
+              <span style="color: var(--color-text-secondary); font-size: 0.9rem;"><i class="fas fa-spinner fa-spin"></i> Loading location...</span>
+            </div>
+          </div>
+
           <div class="profile-section full-width" id="badgesSection">
             <div class="profile-section-header">
               <h3><i class="fas fa-certificate"></i> Badges</h3>
@@ -330,6 +339,17 @@
             <label>Bio</label>
             <textarea class="form-control" id="editBio" rows="3" placeholder="Tell us about yourself, your passion, and what you&rsquo;re building."></textarea>
           </div>
+          <div class="form-group">
+            <label>Map location</label>
+            <div style="display: flex; gap: var(--space-2);">
+              <input type="number" step="any" class="form-control" id="editLat" placeholder="Latitude" style="flex:1">
+              <input type="number" step="any" class="form-control" id="editLng" placeholder="Longitude" style="flex:1">
+            </div>
+            <p style="font-size: 0.8rem; color: var(--color-text-secondary); margin-top: var(--space-1);">
+              <i class="fas fa-info-circle"></i> Coordinates within Malawi. <a href="https://www.latlong.net/" target="_blank" rel="noopener" style="color: var(--color-accent);">Find yours</a>
+            </p>
+          </div>
+
           <div class="form-group">
             <label>Skills</label>
             <div class="skills-input-wrap" id="skillsWrap">
@@ -475,6 +495,41 @@
       skillCount.textContent = (user.skills && user.skills.length) || 0;
       badgeCount.textContent = (user.badges && user.badges.length) || 0;
       document.getElementById('memberSinceStat').textContent = formatDate(user.created_at);
+
+      // Load map location
+      fetchProfileLocation();
+    }
+
+    function fetchProfileLocation() {
+      var stored = localStorage.getItem('auth_user');
+      if (!stored) return;
+      var email = JSON.parse(stored).email;
+      if (!email) return;
+
+      var locEl = document.getElementById('profileLocation');
+      fetch('/api/auth/map-location', { headers: { 'x-user-email': email } })
+        .then(function(r) { return r.json(); })
+        .then(function(res) {
+          if (res.latitude && res.longitude) {
+            var lat = Number(res.latitude).toFixed(4);
+            var lng = Number(res.longitude).toFixed(4);
+            locEl.innerHTML = '<span style="display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap;">' +
+              '<span class="badge-item" style="background: rgba(var(--color-accent-rgb), 0.08); color: var(--color-accent);"><i class="fas fa-check-circle"></i> On the map</span>' +
+              '<span style="font-size: 0.9rem; color: var(--color-text-secondary);">' + lat + ', ' + lng + '</span>' +
+              '<a href="talent_map.html" style="font-size: 0.85rem; color: var(--color-accent); margin-left: auto;">View on map <i class="fas fa-arrow-right"></i></a>' +
+              '</span>';
+          } else {
+            locEl.innerHTML = '<span style="color: var(--color-text-secondary); font-size: 0.9rem;"><i class="fas fa-map-pin"></i> Not on the map yet. <a href="#" id="setLocationFromProfile" style="color: var(--color-accent);">Set your location</a></span>';
+            var setLink = document.getElementById('setLocationFromProfile');
+            if (setLink) setLink.addEventListener('click', function(e) {
+              e.preventDefault();
+              document.getElementById('editProfileBtn').click();
+            });
+          }
+        })
+        .catch(function() {
+          locEl.innerHTML = '<span style="color: var(--color-text-secondary); font-size: 0.9rem;">Could not load map location.</span>';
+        });
     }
 
     function fetchProfile() {
@@ -529,14 +584,31 @@
     var editClose = document.getElementById('editCloseBtn');
     var editCancel = document.getElementById('editCancelBtn');
 
+    function loadEditLocation() {
+      var stored = localStorage.getItem('auth_user');
+      if (!stored) return;
+      var email = JSON.parse(stored).email;
+      if (!email) return;
+      fetch('/api/auth/map-location', { headers: { 'x-user-email': email } })
+        .then(function(r) { return r.json(); })
+        .then(function(res) {
+          document.getElementById('editLat').value = res.latitude || '';
+          document.getElementById('editLng').value = res.longitude || '';
+        })
+        .catch(function() {});
+    }
+
     editBtn.addEventListener('click', function() {
       if (!currentUser) return;
       document.getElementById('editName').value = currentUser.full_name || '';
       document.getElementById('editPhone').value = currentUser.phone || '';
       document.getElementById('editDistrict').value = currentUser.district || '';
       document.getElementById('editBio').value = currentUser.bio || '';
+      document.getElementById('editLat').value = '';
+      document.getElementById('editLng').value = '';
       renderEditSkills(currentUser.skills || []);
       editOverlay.classList.add('show');
+      loadEditLocation();
     });
 
     function closeEdit() { editOverlay.classList.remove('show'); }
@@ -636,6 +708,18 @@
           localStorage.setItem('auth_user', JSON.stringify(currentUser));
           loadProfile(currentUser);
         }
+
+        // Also save map location if provided
+        var lat = document.getElementById('editLat').value;
+        var lng = document.getElementById('editLng').value;
+        if (lat && lng) {
+          fetch('/api/auth/map-location', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json', 'x-user-email': email },
+            body: JSON.stringify({ latitude: parseFloat(lat), longitude: parseFloat(lng) })
+          }).catch(function() {});
+        }
+
         closeEdit();
         btn.disabled = false;
         text.textContent = 'Save changes';
