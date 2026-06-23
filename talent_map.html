@@ -592,6 +592,7 @@
 
   <script>
     (function() {
+      window.__userVectorSource = null;
       let talents = [];
 
       const talentGrid = document.getElementById('talentGrid');
@@ -670,6 +671,26 @@
           item.style.transitionDelay = (idx % 3) * 75 + 'ms';
           setTimeout(function() { item.classList.add('appear'); }, 50);
         });
+
+        // Filter map markers
+        if (window.__userVectorSource) {
+          var vs = window.__userVectorSource;
+          var allFeatures = vs.get('__all') || [];
+          if (allFeatures.length === 0) {
+            allFeatures = vs.getFeatures().slice();
+            vs.set('__all', allFeatures);
+          }
+          vs.clear();
+          var d = districtSelect.value;
+          var s = skillSelect.value;
+          allFeatures.forEach(function(f) {
+            var userDist = f.get('district');
+            var userSkill = f.get('skill');
+            if (d !== 'all' && userDist !== d) return;
+            if (s !== 'all' && userSkill !== s) return;
+            vs.addFeature(f);
+          });
+        }
       }
 
       // Populate skill filter options from data
@@ -982,6 +1003,10 @@
               });
               userVectorSource.addFeature(feature);
             });
+            setTimeout(function() {
+              var f = userVectorSource.getFeatures();
+              userVectorSource.set('__all', f.slice());
+            }, 100);
           })
           .catch(function(err) { console.error('Failed to load users', err); });
       }
