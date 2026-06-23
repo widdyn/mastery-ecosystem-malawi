@@ -854,6 +854,139 @@
           });
         })
         .catch(function(err) { console.error('Failed to load district boundaries:', err); });
+
+      // ---- User markers (clustered) ----
+      var userVectorSource = new ol.source.Vector();
+      window.__userVectorSource = userVectorSource;
+      var clusterSource = new ol.source.Cluster({
+        distance: 40,
+        source: userVectorSource
+      });
+
+      function userStyle(radius, color) {
+        return new ol.style.Style({
+          image: new ol.style.Circle({
+            radius: radius || 8,
+            fill: new ol.style.Fill({ color: color || '#1B7C4B' }),
+            stroke: new ol.style.Stroke({ color: '#FFFFFF', width: 2 })
+          })
+        });
+      }
+
+      function clusterStyle(feature) {
+        var size = feature.get('features').length;
+        if (size === 1) {
+          return userStyle(8, '#1B7C4B');
+        }
+        var radius = Math.min(14, 8 + size * 2);
+        return new ol.style.Style({
+          image: new ol.style.Circle({
+            radius: radius,
+            fill: new ol.style.Fill({ color: '#0F2B3D' }),
+            stroke: new ol.style.Stroke({ color: '#FFFFFF', width: 2 })
+          }),
+          text: new ol.style.Text({
+            text: size.toString(),
+            fill: new ol.style.Fill({ color: '#FFFFFF' }),
+            font: 'bold 12px Inter, sans-serif'
+          })
+        });
+      }
+
+      var clusterLayer = new ol.layer.Vector({
+        source: clusterSource,
+        style: clusterStyle
+      });
+      map.addLayer(clusterLayer);
+
+      // ---- Popup overlay ----
+      var popupEl = document.createElement('div');
+      popupEl.className = 'ol-popup';
+      popupEl.innerHTML = '<div id="popup-content"></div>';
+      var popup = new ol.Overlay({
+        element: popupEl,
+        positioning: 'bottom-center',
+        stopEvent: false,
+        offset: [0, -15]
+      });
+      map.addOverlay(popup);
+
+      function esc(s) {
+        if (!s) return '';
+        var d = document.createElement('div');
+        d.appendChild(document.createTextNode(s));
+        return d.innerHTML;
+      }
+
+      function init(n) {
+        return n.split(' ').map(function(n){return n[0]}).join('').toUpperCase().slice(0,2);
+      }
+
+      // ---- Click handler for markers / clusters ----
+      map.on('click', function(evt) {
+        var feature = map.forEachFeatureAtPixel(evt.pixel, function(f) { return f; });
+        if (!feature) { popup.setPosition(undefined); return; }
+
+        var clusterFeatures = feature.get('features');
+        if (clusterFeatures && clusterFeatures.length > 1) {
+          var extent = feature.getGeometry().getExtent();
+          if (extent) {
+            map.getView().fit(extent, { padding: [60, 60], maxZoom: 12, duration: 300 });
+          }
+          return;
+        }
+
+        var user = clusterFeatures ? clusterFeatures[0] : feature;
+        var coords = user.getGeometry().getCoordinates();
+        var name = user.get('name') || 'Unknown';
+        var skill = user.get('skill') || 'No skill listed';
+        var district = user.get('district') || 'Malawi';
+        var bio = user.get('bio') || 'Mastery Ecosystem member';
+        var avatar = init(name);
+        var shortBio = esc(bio.length > 80 ? bio.substring(0, 80) + '&hellip;' : bio);
+
+        document.getElementById('popup-content').innerHTML =
+          '<div style="text-align:center;min-width:150px">' +
+          '<div style="width:36px;height:36px;border-radius:50%;background:#1B7C4B;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.9rem;margin:0 auto 6px">' + esc(avatar) + '</div>' +
+          '<strong style="font-size:0.95rem">' + esc(name) + '</strong><br>' +
+          '<span style="font-size:0.8rem;color:#64748b"><i class="fas fa-map-marker-alt" style="color:#1B7C4B"></i> ' + esc(district) + '</span><br>' +
+          '<span style="font-size:0.8rem;color:#1B7C4B"><i class="fas fa-bolt"></i> ' + esc(skill) + '</span><br>' +
+          '<span style="font-size:0.78rem;color:#94a3b8;display:block;margin-top:4px">' + shortBio + '</span>' +
+          '<a href="profile.html" style="display:inline-block;margin-top:6px;font-size:0.82rem;color:#1B7C4B;font-weight:600">View profile &rarr;</a>' +
+          '</div>';
+        popup.setPosition(coords);
+      });
+
+      // ---- Pointermove handler ----
+      map.on('pointermove', function(evt) {
+        if (evt.dragging) return;
+        var hit = map.hasFeatureAtPixel(evt.pixel);
+        map.getTargetElement().style.cursor = hit ? 'pointer' : '';
+      });
+
+      // ---- Fetch and display users ----
+      function fetchAndDisplayUsers() {
+        fetch('/api/talent')
+          .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
+          .then(function(res) {
+            if (!res.ok || !Array.isArray(res.data)) return;
+            userVectorSource.clear();
+            res.data.forEach(function(t) {
+              if (!t.latitude || !t.longitude) return;
+              var feature = new ol.Feature({
+                geometry: new ol.geom.Point(ol.proj.fromLonLat([t.longitude, t.latitude])),
+                name: t.full_name,
+                skill: (t.skills && t.skills.length > 0) ? t.skills[0] : 'Skill pending',
+                district: t.district || '',
+                bio: t.bio || ''
+              });
+              userVectorSource.addFeature(feature);
+            });
+          })
+          .catch(function(err) { console.error('Failed to load users', err); });
+      }
+
+      fetchAndDisplayUsers();
     })();
   </script>
 </body>
