@@ -4,409 +4,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Mastery Ecosystem · Talent Map</title>
-  <!-- Google Fonts & Font Awesome -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@latest/ol.css" />
   <link rel="stylesheet" href="style.css">
   <script src="theme.js"></script>
-  <style>
-    /* ----- TALENT MAP SPECIFIC STYLES ----- */
-    .map-filter-grid {
-      display: grid;
-      grid-template-columns: 1fr 340px;
-      gap: var(--space-8);
-      margin: var(--space-8) 0 var(--space-4);
-    }
-
-    .map-container {
-      background: var(--color-bg-muted);
-      border-radius: var(--radius-lg);
-      padding: 0;
-      border: 1px solid var(--color-border);
-      overflow: hidden;
-      min-height: 520px;
-    }
-
-    .map-container #leafletMap {
-      width: 100%;
-      height: 520px;
-      display: block;
-      border-radius: var(--radius-lg);
-      z-index: 1;
-    }
-
-    .map-caption {
-      margin-top: var(--space-3);
-      font-size: 0.9rem;
-      color: var(--color-text-secondary);
-      text-align: center;
-    }
-    .map-caption i {
-      margin-right: var(--space-1);
-    }
-
-    .filter-panel {
-      background: var(--color-bg-surface);
-      border-radius: var(--radius-lg);
-      padding: var(--space-8) var(--space-6);
-      box-shadow: var(--shadow-card);
-      border: 1px solid var(--color-border);
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-    }
-    .filter-group {
-      margin-bottom: var(--space-6);
-    }
-    .filter-group label {
-      font-weight: 700;
-      display: block;
-      margin-bottom: var(--space-2);
-      color: var(--color-text);
-      font-size: 0.95rem;
-    }
-    .filter-select {
-      width: 100%;
-      padding: var(--space-3) var(--space-5);
-      border: 1px solid var(--color-border);
-      border-radius: var(--radius-full);
-      font-family: var(--font-sans);
-      font-size: 0.95rem;
-      background: var(--color-bg-base);
-      color: var(--color-text);
-      outline: none;
-      transition: var(--transition-fast);
-      cursor: pointer;
-    }
-    .filter-select:focus {
-      border-color: var(--color-accent);
-      box-shadow: 0 0 0 3px var(--color-border-glow);
-    }
-    .filter-buttons {
-      display: flex;
-      gap: var(--space-3);
-      flex-wrap: wrap;
-      margin-top: var(--space-4);
-    }
-    .filter-buttons .btn {
-      flex: 1 0 auto;
-    }
-
-    .summary-line {
-      margin: var(--space-2) 0 var(--space-8);
-      font-weight: 700;
-      color: var(--color-primary);
-      font-size: 1.1rem;
-      display: inline-flex;
-      align-items: center;
-      gap: var(--space-2);
-    }
-    .dark-theme .summary-line {
-      color: var(--color-accent);
-    }
-
-    /* talent cards grid */
-    .cards-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: var(--space-6);
-      margin: var(--space-8) 0;
-    }
-    .talent-card {
-      display: flex;
-      flex-direction: column;
-      height: 100%;
-    }
-    .card-header {
-      display: flex;
-      align-items: center;
-      gap: var(--space-4);
-      margin-bottom: var(--space-4);
-    }
-    .profile-img {
-      width: 60px;
-      height: 60px;
-      border-radius: var(--radius-full);
-      background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #FFFFFF;
-      font-weight: 700;
-      font-size: 1.5rem;
-      box-shadow: var(--shadow-sm);
-      border: 2px solid var(--color-border);
-    }
-    .name-district h3 {
-      font-size: 1.25rem;
-      font-family: var(--font-heading);
-      color: var(--color-text);
-      margin-bottom: var(--space-1);
-    }
-    .district-name {
-      color: var(--color-text-secondary);
-      font-size: 0.85rem;
-      font-weight: 500;
-    }
-    .badge-container {
-      display: flex;
-      flex-wrap: wrap;
-      gap: var(--space-2);
-      margin: var(--space-3) 0;
-    }
-    .badge {
-      background: var(--color-bg-muted);
-      padding: var(--space-1) var(--space-4);
-      border-radius: var(--radius-full);
-      font-size: 0.8rem;
-      font-weight: 600;
-      color: var(--color-text);
-      display: inline-flex;
-      align-items: center;
-      gap: var(--space-2);
-      border: 1px solid var(--color-border);
-    }
-    .badge i {
-      color: var(--color-accent);
-    }
-    .video-icon {
-      display: inline-flex;
-      align-items: center;
-      gap: var(--space-2);
-      background: var(--color-bg-muted);
-      padding: var(--space-2) var(--space-4);
-      border-radius: var(--radius-full);
-      font-size: 0.85rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: var(--transition-bounce);
-      border: 1px solid var(--color-border);
-      color: var(--color-text);
-    }
-    .video-icon:hover {
-      background: var(--color-accent);
-      color: #FFFFFF;
-      border-color: var(--color-accent);
-      transform: translateY(-2px);
-    }
-    .availability-tag {
-      display: inline-block;
-      padding: var(--space-1) var(--space-4);
-      border-radius: var(--radius-full);
-      font-size: 0.75rem;
-      font-weight: 800;
-      text-transform: uppercase;
-      margin: var(--space-2) 0;
-      align-self: flex-start;
-      letter-spacing: 0.5px;
-    }
-    .tag-open { background: rgba(46, 125, 50, 0.12); color: #2e7d32; }
-    .dark-theme .tag-open { background: rgba(52, 211, 153, 0.15); color: #34d399; }
-    .tag-funding { background: rgba(10, 75, 140, 0.12); color: #0a4b8c; }
-    .dark-theme .tag-funding { background: rgba(56, 189, 248, 0.15); color: #38bdf8; }
-    .tag-freelance { background: rgba(106, 27, 154, 0.12); color: #6a1b9a; }
-    .dark-theme .tag-freelance { background: rgba(251, 191, 36, 0.15); color: #fbbf24; }
-    .card-quote {
-      font-size: 0.95rem;
-      color: var(--color-text-secondary);
-      margin: var(--space-4) 0;
-      flex: 1;
-      font-style: italic;
-      border-left: 2px solid var(--color-border);
-      padding-left: var(--space-3);
-    }
-    .card-footer {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-top: var(--space-4);
-    }
-    .btn-outline-small {
-      border: 1px solid var(--color-text-secondary);
-      background: transparent;
-      padding: var(--space-2) var(--space-4);
-      border-radius: var(--radius-full);
-      font-weight: 600;
-      color: var(--color-text);
-      text-decoration: none;
-      transition: var(--transition-bounce);
-      font-size: 0.85rem;
-      cursor: pointer;
-    }
-    .btn-outline-small:hover {
-      background: var(--color-primary);
-      color: #FFFFFF;
-      border-color: var(--color-primary);
-      transform: translateY(-2px);
-    }
-    .dark-theme .btn-outline-small:hover {
-      background: var(--color-text);
-      color: var(--color-bg-base);
-      border-color: var(--color-text);
-    }
-
-    /* featured horizontal scroll */
-    .featured-scroll {
-      display: flex;
-      gap: var(--space-6);
-      overflow-x: auto;
-      padding: var(--space-2) var(--space-2) var(--space-6);
-      scrollbar-width: thin;
-      margin: var(--space-4) 0 var(--space-8);
-    }
-    .featured-card {
-      min-width: 300px;
-      flex: 0 0 auto;
-      background: var(--color-bg-muted);
-      border-radius: var(--radius-lg);
-      padding: var(--space-6);
-      border-left: 4px solid var(--color-accent);
-      border-top: 1px solid var(--color-border);
-      border-right: 1px solid var(--color-border);
-      border-bottom: 1px solid var(--color-border);
-      box-shadow: var(--shadow-sm);
-      transition: var(--transition-spring);
-    }
-    .featured-card:hover {
-      transform: translateY(-4px);
-      box-shadow: var(--shadow-card);
-    }
-    .featured-badge {
-      background: var(--color-accent);
-      color: #FFFFFF;
-      font-weight: 800;
-      font-size: 0.7rem;
-      padding: var(--space-1) var(--space-3);
-      border-radius: var(--radius-full);
-      display: inline-block;
-      margin-bottom: var(--space-3);
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-
-    /* CTA cards */
-    .cta-cards {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: var(--space-8);
-      margin: var(--space-12) 0;
-    }
-    .cta-card {
-      text-align: center;
-    }
-    .cta-icon {
-      font-size: 3rem;
-      color: var(--color-accent);
-      margin-bottom: var(--space-4);
-    }
-
-    /* modal */
-    .modal {
-      display: none;
-      position: fixed;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(10, 21, 32, 0.6);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      align-items: center;
-      justify-content: center;
-      z-index: 2000;
-    }
-    .modal-content {
-      background: var(--color-bg-surface);
-      max-width: 500px;
-      width: 90%;
-      border-radius: var(--radius-lg);
-      padding: var(--space-8);
-      text-align: center;
-      box-shadow: var(--shadow-lg);
-      border: 1px solid var(--color-border);
-      position: relative;
-      animation: zoomIn 350ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-    }
-    .modal-close {
-      position: absolute;
-      top: var(--space-4);
-      right: var(--space-4);
-      font-size: 1.5rem;
-      cursor: pointer;
-      color: var(--color-text-secondary);
-      transition: var(--transition-fast);
-      width: 32px;
-      height: 32px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: var(--radius-full);
-    }
-    .modal-close:hover {
-      color: var(--color-text);
-      background: var(--color-bg-muted);
-    }
-
-    @keyframes zoomIn {
-      from { opacity: 0; transform: scale(0.9); }
-      to { opacity: 1; transform: scale(1); }
-    }
-
-    @media (max-width: 992px) {
-      .map-filter-grid {
-        grid-template-columns: 1fr;
-        gap: var(--space-6);
-      }
-      .cards-grid {
-        grid-template-columns: repeat(2, 1fr);
-      }
-      .map-container {
-        min-height: 400px;
-      }
-      .map-container #leafletMap {
-        height: 400px;
-      }
-      .filter-buttons .btn {
-        flex: 1 1 auto;
-        padding: 0.5rem 1rem;
-        font-size: 0.85rem;
-      }
-    }
-    @media (max-width: 480px) {
-      .cards-grid {
-        grid-template-columns: 1fr;
-        gap: var(--space-4);
-      }
-      .cta-cards {
-        grid-template-columns: 1fr;
-        gap: var(--space-6);
-      }
-      .map-container {
-        min-height: 300px;
-      }
-      .map-container #leafletMap {
-        height: 300px;
-      }
-      .filter-panel {
-        padding: var(--space-6) var(--space-4);
-      }
-      .cards-section {
-        padding: var(--space-8) 0;
-      }
-      .filter-buttons {
-        flex-direction: column;
-      }
-      .filter-buttons .btn {
-        width: 100%;
-        justify-content: center;
-      }
-      .filter-select {
-        padding: var(--space-3) var(--space-4);
-      }
-    }
-  </style>
 </head>
 <body>
-  <!-- Navigation -->
   <nav class="navbar">
     <div class="nav-container">
       <a href="index.html" class="logo">Mastery <span>Ecosystem</span></a>
@@ -418,136 +23,119 @@
         <li><a href="manifesto.html">Manifesto</a></li>
         <li><a href="About_us.html">About</a></li>
         <li><a href="contact.html">Contact</a></li>
-        <li class="nav-auth-item"><a href="auth.html" class="nav-auth-link">Sign Up</a></li>
+        <li><a href="auth.html" class="nav-auth-link">Sign Up</a></li>
       </ul>
     </div>
   </nav>
 
   <main>
-    <!-- 1. Page Title & Intro -->
-    <div class="container" style="margin-top: var(--space-12);">
+    <div class="container fade-up">
       <h1>Discover Malawi's Future Industrialists</h1>
-      <p class="section-subhead">Browse verified young innovators from every district. Each profile is backed by a Mastery Badge and a real‑world demonstration of skill.</p>
-      <p style="margin-bottom: var(--space-8);">Use filters to find talent by location, skill, or availability. Ready to hire or invest? Contact them directly.</p>
+      <p class="subhead">Browse verified young innovators from every district. Each profile is backed by a Mastery Badge and a real-world demonstration of skill.</p>
     </div>
 
-    <!-- 2. Map & Filters Section -->
-    <div class="container">
+    <div class="container map-section fade-up">
       <div class="map-filter-grid">
-        <!-- Left: Real Leaflet map -->
         <div class="map-container">
           <div id="leafletMap"></div>
-          <div class="map-caption"><i class="fas fa-map-marker-alt" style="color: var(--color-accent);"></i> Click a district to zoom, or scroll to explore</div>
+          <div class="map-caption"><i class="fas fa-map-marker-alt" style="color:var(--color-accent)"></i> Click a district to zoom, or scroll to explore</div>
         </div>
-        <!-- Right: Filter panel -->
+
         <div class="filter-panel">
-          <div class="filter-group">
-            <label for="districtFilter">District</label>
-            <select id="districtFilter" class="filter-select">
-              <option value="all">All Districts</option>
-              <option value="Lilongwe">Lilongwe</option>
-              <option value="Blantyre">Blantyre</option>
-              <option value="Mzimba">Mzimba</option>
-              <option value="Dedza">Dedza</option>
-              <option value="Mzuzu">Mzuzu</option>
-              <option value="Salima">Salima</option>
-            </select>
+          <div>
+            <div class="filter-group">
+              <label for="districtFilter">District</label>
+              <select id="districtFilter" class="form-control">
+                <option value="all">All Districts</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <label for="skillFilter">Skill</label>
+              <select id="skillFilter" class="form-control">
+                <option value="all">All Skills</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <label for="availabilityFilter">Availability</label>
+              <select id="availabilityFilter" class="form-control">
+                <option value="all">All</option>
+                <option value="Open to Work">Open to Work</option>
+                <option value="Seeking Funding">Seeking Funding</option>
+                <option value="Available for Freelance">Available for Freelance</option>
+              </select>
+            </div>
           </div>
-          <div class="filter-group">
-            <label for="skillFilter">Skill</label>
-            <select id="skillFilter" class="filter-select">
-              <option value="all">All Skills</option>
-              <option value="Solar Installation">Solar Installation</option>
-              <option value="Agri-tech">Agri-tech</option>
-              <option value="Digital Marketing">Digital Marketing</option>
-              <option value="Coding">Coding</option>
-              <option value="AI Data Labeling">AI Data Labeling</option>
-            </select>
-          </div>
-          <div class="filter-group">
-            <label for="availabilityFilter">Availability</label>
-            <select id="availabilityFilter" class="filter-select">
-              <option value="all">All</option>
-              <option value="Open to Work">Open to Work</option>
-              <option value="Seeking Funding">Seeking Funding</option>
-              <option value="Available for Freelance">Available for Freelance</option>
-            </select>
-          </div>
-          <div class="filter-buttons">
-            <button class="btn btn-primary btn-sm" id="applyFilters">Apply Filters</button>
-            <button class="btn btn-outline-light btn-sm" id="resetFilters">Reset</button>
+          <div class="filter-actions">
+            <button class="btn btn-primary btn-sm" id="applyFilters">Apply</button>
+            <button class="btn btn-outline btn-sm" id="resetFilters">Reset</button>
           </div>
         </div>
       </div>
-      <div class="summary-line" id="summary">Showing 8 of 8 talents</div>
+      <div class="summary" id="summary">Loading talents...</div>
     </div>
 
-    <!-- Featured Talent Spotlight -->
-    <div class="container">
-      <h2 style="font-size: 2rem; margin-top: var(--space-12);">⭐ Featured Talent</h2>
+    <div class="container fade-up">
+      <h2>Featured Talent</h2>
       <div class="featured-scroll">
         <div class="featured-card">
-          <span class="featured-badge">Featured</span>
-          <div style="display: flex; gap: var(--space-4); align-items: center; margin-bottom: var(--space-4);">
-            <div class="profile-img" style="width: 50px; height: 50px; font-size: 1.2rem;">KM</div>
-            <div><strong style="color: var(--color-text);">Kondwani M.</strong> <div style="color: var(--color-text-secondary); font-size: 0.85rem;">Lilongwe</div></div>
+          <div class="featured-label">Featured</div>
+          <div class="card-header">
+            <div class="card-avatar card-avatar-sm">KM</div>
+            <div><div class="card-name">Kondwani M.</div><div class="card-district">Lilongwe</div></div>
           </div>
-          <p class="card-quote" style="border: none; padding: 0; margin-bottom: var(--space-4);">“Designed a solar irrigation system for 10 farms.”</p>
-          <div class="badge"><i class="fas fa-sun"></i> Solar Installation</div>
+          <p class="card-quote">"Designed a solar irrigation system for 10 farms."</p>
+          <span class="tag tag-accent"><i class="fas fa-sun"></i> Solar Installation</span>
         </div>
         <div class="featured-card">
-          <span class="featured-badge">Featured</span>
-          <div style="display: flex; gap: var(--space-4); align-items: center; margin-bottom: var(--space-4);">
-            <div class="profile-img" style="width: 50px; height: 50px; font-size: 1.2rem;">CP</div>
-            <div><strong style="color: var(--color-text);">Chisomo P.</strong> <div style="color: var(--color-text-secondary); font-size: 0.85rem;">Blantyre</div></div>
+          <div class="featured-label">Featured</div>
+          <div class="card-header">
+            <div class="card-avatar card-avatar-sm">CP</div>
+            <div><div class="card-name">Chisomo P.</div><div class="card-district">Blantyre</div></div>
           </div>
-          <p class="card-quote" style="border: none; padding: 0; margin-bottom: var(--space-4);">“Built a mobile app for farmers.”</p>
-          <div class="badge"><i class="fas fa-code"></i> Coding</div>
+          <p class="card-quote">"Built a mobile app for farmers."</p>
+          <span class="tag tag-accent"><i class="fas fa-code"></i> Coding</span>
         </div>
         <div class="featured-card">
-          <span class="featured-badge">Featured</span>
-          <div style="display: flex; gap: var(--space-4); align-items: center; margin-bottom: var(--space-4);">
-            <div class="profile-img" style="width: 50px; height: 50px; font-size: 1.2rem;">GM</div>
-            <div><strong style="color: var(--color-text);">Grace M.</strong> <div style="color: var(--color-text-secondary); font-size: 0.85rem;">Mzuzu</div></div>
+          <div class="featured-label">Featured</div>
+          <div class="card-header">
+            <div class="card-avatar card-avatar-sm">GM</div>
+            <div><div class="card-name">Grace M.</div><div class="card-district">Mzuzu</div></div>
           </div>
-          <p class="card-quote" style="border: none; padding: 0; margin-bottom: var(--space-4);">“Digital marketing campaign reached 50k people.”</p>
-          <div class="badge"><i class="fas fa-chart-line"></i> Digital Marketing</div>
+          <p class="card-quote">"Digital marketing campaign reached 50k people."</p>
+          <span class="tag tag-accent"><i class="fas fa-chart-line"></i> Digital Marketing</span>
         </div>
       </div>
     </div>
 
-    <!-- 3. Talent Cards Grid (dynamically generated) -->
     <div class="container">
-      <div class="cards-grid" id="talentGrid"></div>
+      <div class="cards-grid fade-up" id="talentGrid"></div>
     </div>
 
-    <!-- 4. CTA for Employers & Investors -->
     <div class="container">
-      <div class="cta-cards">
-        <div class="cta-card">
+      <div class="cta-grid stagger-children">
+        <div class="cta-card card stagger-item">
           <div class="cta-icon"><i class="fas fa-briefcase"></i></div>
           <h3>Hire Top Talent</h3>
-          <p style="margin: var(--space-4) 0;">Need skilled workers? Tell us your requirements and we’ll send you a shortlist of pre‑vetted candidates.</p>
-          <a href="mailto:info@masteryecosystem.mw" class="btn btn-primary">Request a Shortlist</a>
+          <p>Need skilled workers? We'll send you a shortlist of pre-vetted candidates.</p>
+          <a href="mailto:info@masteryecosystem.mw" class="btn btn-primary btn-sm mt-3">Request a Shortlist</a>
         </div>
-        <div class="cta-card">
+        <div class="cta-card card stagger-item">
           <div class="cta-icon"><i class="fas fa-chart-line"></i></div>
           <h3>Fund a Startup</h3>
-          <p style="margin: var(--space-4) 0;">Interested in backing a youth‑led venture? Browse talent seeking funding or contact us to discuss impact investment.</p>
-          <a href="mailto:info@masteryecosystem.mw" class="btn btn-primary">Explore Investment Opportunities</a>
+          <p>Interested in backing a youth-led venture? Browse talent seeking funding.</p>
+          <a href="mailto:info@masteryecosystem.mw" class="btn btn-primary btn-sm mt-3">Explore Opportunities</a>
         </div>
       </div>
     </div>
   </main>
 
-  <!-- Footer -->
   <footer>
     <div class="container">
       <div class="footer-grid">
         <div>
           <div class="footer-logo">Mastery <span>Ecosystem</span></div>
-          <p class="footer-desc">From learning to impact – uniting Malawi’s talent with industry.</p>
-          <div class="social-icons">
+          <p class="footer-desc">From learning to impact &ndash; uniting Malawi's talent with industry.</p>
+          <div class="social">
             <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
             <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
             <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
@@ -567,315 +155,142 @@
           <a href="contact.html">Contact</a>
           <a href="#">Blog</a>
         </div>
-        <div class="footer-contact">
+        <div>
           <h4>Contact</h4>
           <div class="footer-contact-item"><i class="fas fa-envelope"></i> info@masteryecosystem.mw</div>
           <div class="footer-contact-item"><i class="fas fa-map-pin"></i> Area 47, Lilongwe, Malawi</div>
         </div>
       </div>
-      <div class="copyright">
-        © 2026 Mastery Ecosystem. All rights reserved.
-      </div>
+      <div class="copyright">&copy; 2026 Mastery Ecosystem. All rights reserved.</div>
     </div>
   </footer>
 
-  <!-- Modal for video / profile (simple) -->
-  <div id="videoModal" class="modal">
-    <div class="modal-content">
-      <span class="modal-close" id="closeModal">&times;</span>
-      <i class="fas fa-video" style="font-size: 3rem; color: var(--color-accent); margin-bottom: var(--space-4); display: inline-block;"></i>
-      <h3 style="margin: var(--space-4) 0;">Video Demonstration</h3>
-      <p style="color: var(--color-text-secondary);">In a real implementation, a 30‑second clip would play here showing the talent's skill.</p>
+  <div id="videoModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);backdrop-filter:blur(8px);align-items:center;justify-content:center;z-index:200">
+    <div style="background:var(--color-surface);max-width:420px;width:90%;border-radius:var(--radius-lg);padding:var(--space-6);text-align:center">
+      <span id="closeModal" style="float:right;cursor:pointer;color:var(--color-text-secondary);font-size:1.5rem">&times;</span>
+      <i class="fas fa-video" style="font-size:2.5rem;color:var(--color-accent);margin:var(--space-4) 0"></i>
+      <h3 style="margin:var(--space-3) 0">Video Demonstration</h3>
+      <p style="color:var(--color-text-secondary);font-size:0.9rem">In a real implementation, a 30-second clip would play here.</p>
     </div>
   </div>
 
   <script>
     (function() {
-      let talents = [];
-
-      const talentGrid = document.getElementById('talentGrid');
-      const summarySpan = document.getElementById('summary');
-      const districtSelect = document.getElementById('districtFilter');
-      const skillSelect = document.getElementById('skillFilter');
-      const availabilitySelect = document.getElementById('availabilityFilter');
-      const applyBtn = document.getElementById('applyFilters');
-      const resetBtn = document.getElementById('resetFilters');
-
-      // Map district paths
-      const districtPaths = document.querySelectorAll('.district');
-      let activeDistrict = null;
-
-      function getInitials(name) {
-        return name.split(' ').map(function(n) { return n[0]; }).join('').toUpperCase().slice(0, 2);
+      var h = document.getElementById('hamburgerBtn'), m = document.getElementById('navMenu');
+      if (h && m) {
+        h.addEventListener('click', function(e) { e.stopPropagation(); m.classList.toggle('show'); h.setAttribute('aria-expanded', m.classList.contains('show')); });
+        m.querySelectorAll('a').forEach(function(l) { l.addEventListener('click', function() { if (window.innerWidth <= 992) m.classList.remove('show'); }); });
       }
+      window.addEventListener('resize', function() { if (window.innerWidth > 992 && m && m.classList.contains('show')) m.classList.remove('show'); });
 
-      function escapeHtml(str) {
-        var div = document.createElement('div');
-        div.appendChild(document.createTextNode(str));
-        return div.innerHTML;
-      }
+      var talents = [];
+      var grid = document.getElementById('talentGrid');
+      var summary = document.getElementById('summary');
+      var ds = document.getElementById('districtFilter');
+      var ss = document.getElementById('skillFilter');
+      var as = document.getElementById('availabilityFilter');
 
-      // Helper to clear map highlights
-      function clearMapHighlight() {
-        districtPaths.forEach(p => p.classList.remove('active'));
-      }
+      function init(n) { return n.split(' ').map(function(n){return n[0]}).join('').toUpperCase().slice(0,2); }
+      function esc(s) { var d = document.createElement('div'); d.appendChild(document.createTextNode(s)); return d.innerHTML; }
 
-      // Render cards based on filters
-      function renderCards() {
-        const district = districtSelect.value;
-        const skill = skillSelect.value;
-        const availability = availabilitySelect.value;
-
-        const filtered = talents.filter(t => {
-          if (district !== 'all' && t.district !== district) return false;
-          if (skill !== 'all' && (t.skills || []).indexOf(skill) === -1) return false;
-          if (availability !== 'all' && (t.availability || 'Open to Work') !== availability) return false;
+      function render() {
+        var d = ds.value, s = ss.value, a = as.value;
+        var f = talents.filter(function(t) {
+          if (d !== 'all' && t.district !== d) return false;
+          if (s !== 'all' && (!t.skills || t.skills.indexOf(s) === -1)) return false;
+          if (a !== 'all' && (t.availability || 'Open to Work') !== a) return false;
           return true;
         });
-
-        summarySpan.innerText = 'Showing ' + filtered.length + ' of ' + talents.length + ' talents';
-
-        let html = '';
-        filtered.forEach(function(t) {
-          var initials = getInitials(t.full_name);
-          var skillHtml = (t.skills && t.skills.length > 0)
-            ? '<span class="badge"><i class="fas fa-bolt"></i> ' + escapeHtml(t.skills[0]) + '</span>'
-            : '<span class="badge"><i class="fas fa-bolt"></i> Skill pending</span>';
-          var badge2Html = (t.badges && t.badges.length > 0)
-            ? '<span class="badge"><i class="fas fa-tag"></i> ' + escapeHtml(t.badges[0]) + '</span>'
-            : '';
-          var availability = t.availability || 'Open to Work';
-          var availabilityClass = availability === 'Open to Work' ? 'tag-open' : (availability === 'Seeking Funding' ? 'tag-funding' : 'tag-freelance');
-          var desc = t.bio || 'No bio yet.';
-          html += '<div class="talent-card card">'
-            + '<div class="card-header">'
-            + '<div class="profile-img">' + escapeHtml(initials) + '</div>'
-            + '<div class="name-district">'
-            + '<h3>' + escapeHtml(t.full_name) + '</h3>'
-            + '<div class="district-name"><i class="fas fa-map-marker-alt" style="color: var(--color-accent);"></i> ' + escapeHtml(t.district || 'Malawi') + '</div>'
-            + '</div></div>'
-            + '<div class="badge-container">' + skillHtml + badge2Html + '</div>'
-            + '<div class="availability-tag ' + availabilityClass + '">' + availability + '</div>'
-            + '<p class="card-quote">\u201c' + escapeHtml(desc) + '\u201d</p>'
-            + '<div class="card-footer">'
-            + '<button class="btn-outline-small" onclick="viewProfile(\'' + escapeHtml(t.full_name) + '\', ' + t.id + ')">View Profile</button>'
-            + '</div></div>';
+        summary.textContent = 'Showing ' + f.length + ' of ' + talents.length + ' talents';
+        var html = '';
+        f.forEach(function(t) {
+          var sk = (t.skills && t.skills.length > 0) ? '<span class="tag tag-accent"><i class="fas fa-bolt"></i> ' + esc(t.skills[0]) + '</span>' : '';
+          var b2 = (t.badges && t.badges.length > 0) ? '<span class="tag tag-muted"><i class="fas fa-tag"></i> ' + esc(t.badges[0]) + '</span>' : '';
+          var av = t.availability || 'Open to Work';
+          var ac = av === 'Open to Work' ? 'tag-open' : av === 'Seeking Funding' ? 'tag-funding' : 'tag-freelance';
+          html += '<div class="card talent-card"><div class="card-header"><div class="card-avatar">' + esc(init(t.full_name)) + '</div><div><div class="card-name">' + esc(t.full_name) + '</div><div class="card-district"><i class="fas fa-map-marker-alt" style="color:var(--color-accent);font-size:0.75rem"></i> ' + esc(t.district||'Malawi') + '</div></div></div><div class="card-skills">' + sk + b2 + '</div><span class="tag ' + ac + '" style="align-self:flex-start">' + av + '</span><p class="card-quote">\u201c' + esc(t.bio||'No bio yet.') + '\u201d</p><div class="card-actions"><button class="btn btn-outline btn-sm" onclick="alert(\'Profile of ' + esc(t.full_name).replace(/'/g, "\\'") + '\')">View Profile</button></div></div>';
         });
-        talentGrid.innerHTML = html;
-
-        var animElements = talentGrid.querySelectorAll('.talent-card');
-        animElements.forEach(function(item, idx) {
-          item.classList.add('stagger-item');
-          item.style.transitionDelay = (idx % 3) * 75 + 'ms';
-          setTimeout(function() { item.classList.add('appear'); }, 50);
-        });
+        grid.innerHTML = html || '<p class="text-muted" style="text-align:center;padding:var(--space-10)">No talent matches your filters.</p>';
       }
 
-      // Populate skill filter options from data
-      function populateFilters() {
-        if (!Array.isArray(talents)) { renderCards(); return; }
-        var skillSet = {};
-        var districtSet = {};
+      function populate() {
+        if (!Array.isArray(talents)) { render(); return; }
+        var sk = {}, di = {};
         talents.forEach(function(t) {
-          if (t.district) districtSet[t.district] = true;
-          (t.skills || []).forEach(function(s) { skillSet[s] = true; });
+          if (t.district) di[t.district] = true;
+          (t.skills||[]).forEach(function(s){sk[s]=true;});
         });
-        var skills = Object.keys(skillSet).sort();
-        var districts = Object.keys(districtSet).sort();
-
-        // Update skill select
-        var currentVal = skillSelect.value;
-        skillSelect.innerHTML = '<option value="all">All Skills</option>';
-        skills.forEach(function(s) {
-          skillSelect.innerHTML += '<option value="' + s.replace(/"/g, '&quot;') + '">' + s + '</option>';
-        });
-        skillSelect.value = currentVal !== 'all' && skills.indexOf(currentVal) !== -1 ? currentVal : 'all';
-
-        // Update district select
-        currentVal = districtSelect.value;
-        districtSelect.innerHTML = '<option value="all">All Districts</option>';
-        districts.forEach(function(d) {
-          districtSelect.innerHTML += '<option value="' + d.replace(/"/g, '&quot;') + '">' + d + '</option>';
-        });
-        districtSelect.value = currentVal !== 'all' && districts.indexOf(currentVal) !== -1 ? currentVal : 'all';
-
-        renderCards();
+        var sks = Object.keys(sk).sort(), dis = Object.keys(di).sort();
+        ss.innerHTML = '<option value="all">All Skills</option>';
+        sks.forEach(function(s){ss.innerHTML += '<option value="' + s.replace(/"/g,'&quot;') + '">' + s + '</option>';});
+        ds.innerHTML = '<option value="all">All Districts</option>';
+        dis.forEach(function(d){ds.innerHTML += '<option value="' + d.replace(/"/g,'&quot;') + '">' + d + '</option>';});
+        render();
       }
 
-      // Fetch talent from API
-      function loadTalents() {
+      function load() {
         fetch('/api/talent')
-          .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
-          .then(function(res) {
-            if (!res.ok || !Array.isArray(res.data)) {
-              summarySpan.innerText = 'Could not load talent data.';
-              if (res.data && res.data.error) console.error('Talent API:', res.data.error);
-              return;
-            }
-            talents = res.data;
-            populateFilters();
+          .then(function(r){return r.json().then(function(d){return{ok:r.ok,data:d}})})
+          .then(function(res){
+            if (!res.ok || !Array.isArray(res.data)) { summary.textContent = 'Could not load talent data.'; return; }
+            talents = res.data; populate();
           })
-          .catch(function() {
-            summarySpan.innerText = 'Talent data unavailable \u2014 start the server with \u201cnpm start\u201d';
-          });
+          .catch(function(){ summary.textContent = 'Talent data unavailable \u2014 start the server with \u201cnpm start\u201d'; });
       }
+      load();
 
-      loadTalents();
+      document.getElementById('applyFilters').addEventListener('click', render);
+      document.getElementById('resetFilters').addEventListener('click', function() { ds.value = 'all'; ss.value = 'all'; as.value = 'all'; render(); });
 
-      // Filter apply
-      applyBtn.addEventListener('click', function() {
-        var selectedDistrict = districtSelect.value;
-        clearMapHighlight();
-        if (selectedDistrict !== 'all') {
-          var activePath = document.getElementById('district' + selectedDistrict);
-          if (activePath) activePath.classList.add('active');
-        }
-        renderCards();
-      });
-
-      // Reset filters
-      resetBtn.addEventListener('click', function() {
-        districtSelect.value = 'all';
-        skillSelect.value = 'all';
-        availabilitySelect.value = 'all';
-        clearMapHighlight();
-        renderCards();
-      });
-
-      // Map click handler
-      districtPaths.forEach(function(path) {
-        path.addEventListener('click', function(e) {
-          var district = path.getAttribute('data-district');
-          if (district) {
-            districtSelect.value = district;
-            clearMapHighlight();
-            path.classList.add('active');
-            renderCards();
-          }
-        });
-      });
-
-      // Hamburger menu
-      var hamburger = document.getElementById('hamburgerBtn');
-      var navMenu = document.getElementById('navMenu');
-      if (hamburger && navMenu) {
-        hamburger.addEventListener('click', function(e) {
-          e.stopPropagation();
-          navMenu.classList.toggle('show');
-        });
-        navMenu.querySelectorAll('a').forEach(function(link) {
-          link.addEventListener('click', function() {
-            if (window.innerWidth <= 768) navMenu.classList.remove('show');
-          });
-        });
-      }
-      window.addEventListener('resize', function() {
-        if (window.innerWidth > 768 && navMenu && navMenu.classList.contains('show')) {
-          navMenu.classList.remove('show');
-        }
-      });
-
-      // Modal functions
-      window.openVideoModal = function(name) {
-        document.getElementById('videoModal').style.display = 'flex';
-      };
-      window.viewProfile = function(name, id) {
-        alert('Profile of ' + name + ' \u2013 View at profile.html (sign in required)');
-      };
-      document.getElementById('closeModal').addEventListener('click', function() {
-        document.getElementById('videoModal').style.display = 'none';
-      });
-      window.addEventListener('click', function(e) {
-        if (e.target.classList.contains('modal')) {
-          e.target.style.display = 'none';
-        }
-      });
+      document.getElementById('closeModal').addEventListener('click', function() { document.getElementById('videoModal').style.display = 'none'; });
+      window.addEventListener('click', function(e) { if (e.target.id === 'videoModal') e.target.style.display = 'none'; });
     })();
   </script>
-
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
     (function() {
-      const map = L.map('leafletMap').setView([-13.5, 34], 7);
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>',
-        maxZoom: 19
-      }).addTo(map);
+      var map = L.map('leafletMap').setView([-13.5, 34], 7);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>', maxZoom: 19 }).addTo(map);
 
-      let districtLayer = null;
+      var districtLayer = null;
 
       fetch('malawi_districts.geojson')
-        .then(r => r.json())
-        .then(data => {
+        .then(function(r){return r.json()})
+        .then(function(data){
           districtLayer = L.geoJSON(data, {
-            style: {
-              color: '#2b8cbe',
-              weight: 2,
-              fillColor: '#a6cee3',
-              fillOpacity: 0.2
-            },
-            onEachFeature: (feature, layer) => {
+            style: { color: '#1B7C4B', weight: 1.5, fillColor: '#1B7C4B', fillOpacity: 0.08 },
+            onEachFeature: function(feature, layer) {
               layer.bindTooltip(feature.properties.shapeName || 'District', { sticky: true, direction: 'top' });
-              layer.on('click', () => {
-                map.fitBounds(layer.getBounds(), { padding: [40, 40] });
-              });
+              layer.on('click', function() { map.fitBounds(layer.getBounds(), { padding: [40, 40] }); });
             }
           }).addTo(map);
 
-          // Sync district dropdown click to map zoom
           document.getElementById('districtFilter').addEventListener('change', function() {
-            const name = this.value;
-            if (name === 'all') {
-              map.setView([-13.5, 34], 7);
-              return;
-            }
+            var name = this.value;
+            if (name === 'all') { map.setView([-13.5, 34], 7); return; }
             if (!districtLayer) return;
-            districtLayer.eachLayer(l => {
-              if (l.feature.properties.shapeName === name) {
-                map.fitBounds(l.getBounds(), { padding: [40, 40] });
-              }
+            districtLayer.eachLayer(function(l) {
+              if (l.feature.properties.shapeName === name) map.fitBounds(l.getBounds(), { padding: [40, 40] });
             });
           });
         })
-        .catch(err => console.error('Failed to load district boundaries:', err));
+        .catch(function(err){console.error('Failed to load district boundaries:', err);});
 
-      // Load user markers from API
-      function escapeHtml(str) {
-        if (!str) return '';
-        var div = document.createElement('div');
-        div.appendChild(document.createTextNode(str));
-        return div.innerHTML;
-      }
+      function esc(s) { if (!s) return ''; var d = document.createElement('div'); d.appendChild(document.createTextNode(s)); return d.innerHTML; }
 
       fetch('/api/talent')
-        .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
-        .then(function(res) {
+        .then(function(r){return r.json().then(function(d){return{ok:r.ok,data:d}})})
+        .then(function(res){
           if (!res.ok || !Array.isArray(res.data)) return;
           res.data.forEach(function(t) {
             if (!t.latitude || !t.longitude) return;
-            var initials = t.full_name.split(' ').map(function(n) { return n[0]; }).join('').toUpperCase().slice(0, 2);
+            var inits = t.full_name.split(' ').map(function(n){return n[0]}).join('').toUpperCase().slice(0,2);
             var skills = (t.skills && t.skills.length > 0) ? t.skills.join(', ') : 'Skill pending';
-            var bio = t.bio ? escapeHtml(t.bio.substring(0, 80)) + (t.bio.length > 80 ? '&hellip;' : '') : 'Mastery Ecosystem member';
-            var html = '<div style="text-align:center;min-width:160px;">'
-              + '<div style="width:36px;height:36px;border-radius:50%;background:var(--color-accent,#1B7C4B);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.9rem;margin:0 auto 6px;">' + escapeHtml(initials) + '</div>'
-              + '<strong style="font-size:0.95rem;">' + escapeHtml(t.full_name) + '</strong><br>'
-              + '<span style="font-size:0.8rem;color:#64748b;">' + escapeHtml(t.district || 'Malawi') + '</span><br>'
-              + '<span style="font-size:0.8rem;color:#1B7C4B;"><i class="fas fa-bolt"></i> ' + escapeHtml(skills) + '</span><br>'
-              + '<span style="font-size:0.78rem;color:#94a3b8;display:block;margin-top:4px;">' + bio + '</span>'
-              + '<a href="auth.html" style="display:inline-block;margin-top:6px;font-size:0.82rem;color:#1B7C4B;font-weight:600;">View profile \u2192</a>'
-              + '</div>';
-
-            var color = '#1B7C4B';
-            L.circleMarker([t.latitude, t.longitude], {
-              radius: 8,
-              fillColor: color,
-              color: '#FFFFFF',
-              weight: 2,
-              fillOpacity: 0.85
-            }).addTo(map).bindPopup(html);
+            var bio = t.bio ? esc(t.bio.substring(0, 80)) + (t.bio.length > 80 ? '&hellip;' : '') : 'Mastery Ecosystem member';
+            var html = '<div style="min-width:150px"><div style="width:32px;height:32px;border-radius:50%;background:var(--color-accent,#1B7C4B);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.8rem;margin:0 auto 4px">' + esc(inits) + '</div><strong style="font-size:0.9rem">' + esc(t.full_name) + '</strong><br><span style="font-size:0.78rem;color:#6B7280">' + esc(t.district||'Malawi') + '</span><br><span style="font-size:0.78rem;color:#1B7C4B"><i class="fas fa-bolt"></i> ' + esc(skills) + '</span><br><span style="font-size:0.75rem;color:#94a3b8;display:block;margin-top:4px">' + bio + '</span><a href="auth.html" style="display:inline-block;margin-top:4px;font-size:0.8rem;color:#1B7C4B;font-weight:600">View profile \u2192</a></div>';
+            L.circleMarker([t.latitude, t.longitude], { radius: 7, fillColor: '#1B7C4B', color: '#FFFFFF', weight: 2, fillOpacity: 0.85 }).addTo(map).bindPopup(html);
           });
         })
-        .catch(function() {});
+        .catch(function(){});
     })();
   </script>
 </body>
