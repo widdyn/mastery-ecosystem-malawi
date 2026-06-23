@@ -8,8 +8,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@latest/ol.css" />
-  <script src="https://cdn.jsdelivr.net/npm/ol@latest/dist/ol.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@10.4.0/ol.css" />
+  <script src="https://cdn.jsdelivr.net/npm/ol@10.4.0/dist/ol.js"></script>
   <link rel="stylesheet" href="style.css">
   <script src="theme.js"></script>
   <style>
@@ -603,10 +603,6 @@
       const applyBtn = document.getElementById('applyFilters');
       const resetBtn = document.getElementById('resetFilters');
 
-      // Map district paths
-      const districtPaths = document.querySelectorAll('.district');
-      let activeDistrict = null;
-
       function getInitials(name) {
         return name.split(' ').map(function(n) { return n[0]; }).join('').toUpperCase().slice(0, 2);
       }
@@ -615,11 +611,6 @@
         var div = document.createElement('div');
         div.appendChild(document.createTextNode(str));
         return div.innerHTML;
-      }
-
-      // Helper to clear map highlights
-      function clearMapHighlight() {
-        districtPaths.forEach(p => p.classList.remove('active'));
       }
 
       // Render cards based on filters
@@ -683,11 +674,14 @@
           vs.clear();
           var d = districtSelect.value;
           var s = skillSelect.value;
+          var a = availabilitySelect.value;
           allFeatures.forEach(function(f) {
             var userDist = f.get('district');
             var userSkill = f.get('skill');
+            var userAvail = f.get('availability');
             if (d !== 'all' && userDist !== d) return;
             if (s !== 'all' && userSkill !== s) return;
+            if (a !== 'all' && userAvail !== a) return;
             vs.addFeature(f);
           });
         }
@@ -746,12 +740,6 @@
 
       // Filter apply
       applyBtn.addEventListener('click', function() {
-        var selectedDistrict = districtSelect.value;
-        clearMapHighlight();
-        if (selectedDistrict !== 'all') {
-          var activePath = document.getElementById('district' + selectedDistrict);
-          if (activePath) activePath.classList.add('active');
-        }
         renderCards();
       });
 
@@ -760,21 +748,12 @@
         districtSelect.value = 'all';
         skillSelect.value = 'all';
         availabilitySelect.value = 'all';
-        clearMapHighlight();
         renderCards();
       });
 
-      // Map click handler
-      districtPaths.forEach(function(path) {
-        path.addEventListener('click', function(e) {
-          var district = path.getAttribute('data-district');
-          if (district) {
-            districtSelect.value = district;
-            clearMapHighlight();
-            path.classList.add('active');
-            renderCards();
-          }
-        });
+      // Listen for district changes from map
+      document.addEventListener('districtchange', function(e) {
+        renderCards();
       });
 
       // Hamburger menu
@@ -831,7 +810,7 @@
           minZoom: 5,
           maxZoom: 12
         }),
-        controls: ol.control.defaults.defaults({ zoom: true, attribution: false })
+        controls: ol.control.defaults.defaults({ zoom: true })
       });
 
       // District boundaries
@@ -870,7 +849,7 @@
               var name = feature.get('shapeName') || 'District';
               var ds = document.getElementById('districtFilter');
               if (ds) { ds.value = name; }
-              if (typeof render === 'function') render();
+              document.dispatchEvent(new CustomEvent('districtchange', { detail: { district: name } }));
             }
           });
         })
@@ -999,16 +978,19 @@
                 name: t.full_name,
                 skill: (t.skills && t.skills.length > 0) ? t.skills[0] : 'Skill pending',
                 district: t.district || '',
-                bio: t.bio || ''
+                bio: t.bio || '',
+                availability: t.availability || 'Open to Work'
               });
               userVectorSource.addFeature(feature);
             });
-            setTimeout(function() {
-              var f = userVectorSource.getFeatures();
-              userVectorSource.set('__all', f.slice());
-            }, 100);
+            var allFeatures = userVectorSource.getFeatures();
+            userVectorSource.set('__all', allFeatures.slice());
           })
-          .catch(function(err) { console.error('Failed to load users', err); });
+          .catch(function(err) {
+            console.error('Failed to load users', err);
+            var s = document.getElementById('summary');
+            if (s) s.textContent = 'Talent data unavailable \u2014 start the server with \u201cnpm start\u201d';
+          });
       }
 
       fetchAndDisplayUsers();
