@@ -812,6 +812,48 @@
         }),
         controls: ol.control.defaults.defaults({ zoom: true, attribution: false })
       });
+
+      // District boundaries
+      var districtSource = new ol.source.Vector();
+      var districtLayer = new ol.layer.Vector({
+        source: districtSource,
+        style: new ol.style.Style({
+          stroke: new ol.style.Stroke({
+            color: '#1B7C4B',
+            width: 1.5
+          }),
+          fill: new ol.style.Fill({
+            color: 'rgba(27, 124, 75, 0.08)'
+          })
+        })
+      });
+      map.addLayer(districtLayer);
+
+      fetch('malawi_districts.geojson')
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          var features = new ol.format.GeoJSON().readFeatures(data, {
+            dataProjection: 'EPSG:4326',
+            featureProjection: 'EPSG:3857'
+          });
+          districtSource.addFeatures(features);
+
+          // District click: zoom to bounds
+          map.on('click', function(evt) {
+            var feature = map.forEachFeatureAtPixel(evt.pixel, function(f, l) {
+              return l === districtLayer ? f : null;
+            });
+            if (feature) {
+              var extent = feature.getGeometry().getExtent();
+              map.getView().fit(extent, { padding: [40, 40], maxZoom: 10 });
+              var name = feature.get('shapeName') || 'District';
+              var ds = document.getElementById('districtFilter');
+              if (ds) { ds.value = name; }
+              if (typeof render === 'function') render();
+            }
+          });
+        })
+        .catch(function(err) { console.error('Failed to load district boundaries:', err); });
     })();
   </script>
 </body>
